@@ -1,5 +1,5 @@
-from golfappbackend import create_app
-from golfappbackend.views import create_server_connection, run_query, getThreeWeeks
+import create_app
+from views import create_server_connection, run_query, getThreeWeeks
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import flask
