@@ -133,6 +133,10 @@ def user_helper(connection, user):
 #     username = list(username)
 #     return username[0]
 
+@views.route('/')
+def home():
+    return flask.jsonify({"message": "hello world"})
+
 def make_cookie(user, type):
     x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(16))
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
