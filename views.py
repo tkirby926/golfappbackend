@@ -6,7 +6,6 @@ from os import curdir
 from re import I
 from flask import Blueprint, render_template, request
 import flask
-from importlib_metadata import re
 import mysql.connector
 from mysql.connector import Error
 from numpy import mat
@@ -27,13 +26,10 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.background import BackgroundScheduler
-import dropbox
-import boto3
 import random, string
 
 
 BUCKET = 'golftribephotos'
-s3 = boto3.client('s3', aws_access_key_id="AKIAT6ACDNJMUUI2VXPR", aws_secret_access_key= "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")
 
 def job2():
     return
@@ -66,9 +62,9 @@ trigger = CronTrigger(
 # trigger2 = CronTrigger(
 #         year="*", month="*", day="*", hour="*", minute="*", second=0
 # )
-scheduler = BackgroundScheduler(daemon=False)
-scheduler.start()
-scheduler.add_job(func=job, trigger=trigger)
+# scheduler = BackgroundScheduler(daemon=False)
+# scheduler.start()
+# scheduler.add_job(func=job, trigger=trigger)
 # scheduler.add_job(func=job2, trigger=trigger2)
 
 def create_server_connection(host_name, user_name, user_password, db):
@@ -82,7 +78,8 @@ def create_server_connection(host_name, user_name, user_password, db):
         )
     except Error as err:
         print(f"Error: '{err}'")
-
+    print(connection)
+    print("hi")
     return connection
 
 def run_query(connection, query, variables):
@@ -133,10 +130,6 @@ def user_helper(connection, user):
 #     username = list(username)
 #     return username[0]
 
-@views.route('/')
-def home():
-    return flask.jsonify({"message": "hello world"})
-
 def make_cookie(user, type):
     x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(16))
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -178,8 +171,9 @@ def translate_verification(connection, user):
 
 views = Blueprint('views', __name__)
 
-# @views.route('/')
-# def home():
+@views.route('/')
+def home():
+    return flask.jsonify({"message": "hello world"})
 #     # connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 #     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
 #     if flask.session.get('username'):
@@ -502,6 +496,7 @@ def get_friend_requests(user, page):
 @views.route('/api/v1/search/courses/<string:search>/<string:page>/<string:limit>')
 def get_search_courses(search, page, limit):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
+    print(connection)
     search = '%' + search + '%'
     cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename, imageurl FROM COURSES WHERE coursename LIKE "
     "%s LIMIT %s OFFSET %s;", (search, int(limit), int(page)*int(limit)))
@@ -961,7 +956,7 @@ def register_course():
     if count == 1:
         context = {'error': 'Course has already been registered'}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT COUNT(*) FROM PENDINGCOURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
+    cursor = run_query(connection, "SELECT COUNT(*) FROM COURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
     count = cursor.fetchone()[0]
     if count == 1:
         context = {'error': 'Course has already been submitted as is waiting approval. We will contact you shortly and thank you for your patience'}
@@ -996,9 +991,9 @@ def register_course():
         print(res)
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
-    cursor = run_query(connection, """INSERT INTO PENDINGCOURSES (coursename, latitude, longitude, street, town, state, 
-    zip, adminemail, adminpassword, adminphone, canedit, imageurl) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, '0');", (req['name'], str(lat), str(lon), req['address'], req['town'], 
+    cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
+    zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, '0', %s, '0');", (req['name'], str(lat), str(lon), req['address'], req['town'], 
     req['state'], req['zip'], req['email'], pass_dict['password_db_string'], req['phone'], image_url))
     context = {'error': ''}
     return flask.jsonify(**context)
