@@ -172,9 +172,9 @@ def translate_verification(connection, user):
     return username[0]
 
 
-views = Blueprint('views', __name__)
+app = Blueprint('app', __name__)
 
-# @views.route('/')
+# @app.route('/')
 # def home():
 #     # connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 #     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
@@ -185,22 +185,22 @@ views = Blueprint('views', __name__)
     
 #     return render_template('initial_page.html', **context)
 
-# @views.route('/swiper/')
+# @app.route('/swiper/')
 # def show_profiles():
 #     context = {"good_times": [], "is_selected": 10, "zip": ''}
 #     return render_template('tindersearch.html')
 
-# @views.route('/times/')
+# @app.route('/times/')
 # def show_times():
 #     context = {"good_courses": [], "is_selected": 10, "zip": ''}
 #     return render_template('teetimesearch.html')
 
-# @views.route('/login/')
+# @app.route('/login/')
 # def login():
 #     context = {"showfail": "no"}
 #     return render_template('login_page.html', **context)
 
-# @views.route('/test_login/')
+# @app.route('/test_login/')
 # def test_login():
 #     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 #     cursor = run_query(connection, "SELECT * FROM USERS WHERE username='" 
@@ -211,13 +211,13 @@ views = Blueprint('views', __name__)
 #         return render_template('login_page.html', **context)
 #     else:
 #         flask.session['username'] = flask.request.args.get('username')
-#         return flask.redirect(flask.url_for('views.home'))
+#         return flask.redirect(flask.url_for('app.home'))
 
-# @views.route('/create_account/')
+# @app.route('/create_account/')
 # def create_account():
 #     return render_template('create_account.html')
 
-# @views.route('/render_account/', methods = ["POST"])
+# @app.route('/render_account/', methods = ["POST"])
 # def render_account():
 #     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 #     # # print(flask.request.form.get('username'))
@@ -236,12 +236,12 @@ views = Blueprint('views', __name__)
 #     #                                 flask.request.form.get('descript') + "', '" + flask.request.form.get('college') + "')")
 #     # return render_template("initial_page.html")
 
-# @views.route('/logout/')
+# @app.route('/logout/')
 # def logout():
 #     flask.session.pop('username', None)
-#     return flask.redirect(flask.url_for('views.home'))
+#     return flask.redirect(flask.url_for('app.home'))
 
-# @views.route('/render_loc/')
+# @app.route('/render_loc/')
 # def render_loc():
 #     # print(data)
 #     # connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -273,7 +273,7 @@ views = Blueprint('views', __name__)
 #     context = {"good_courses": good_courses, "is_selected": flask.request.args.get('length'), "zip": flask.request.args.get('loc')}
 #     return render_template('teetimesearch.html', **context)
 
-@views.route("""/api/v1/<int:zip_url_slug>&<int:length_url_slug>&<string:firstdate_url_slug>&<string:firsttime_url_slug>
+@app.route("""/api/v1/<int:zip_url_slug>&<int:length_url_slug>&<string:firstdate_url_slug>&<string:firsttime_url_slug>
                 &<string:seconddate_url_slug>&<string:secondtime_url_slug>""")
 def swiper_api(zip_url_slug, length_url_slug, firstdate_url_slug, firsttime_url_slug, 
                seconddate_url_slug, secondtime_url_slug):
@@ -292,7 +292,7 @@ def swiper_api(zip_url_slug, length_url_slug, firstdate_url_slug, firsttime_url_
     return flask.jsonify(**context)
 
 
-@views.route('/api/v1/locations/<string:zip>/<int:length>')
+@app.route('/api/v1/locations/<string:zip>/<int:length>')
 def get_times(zip, length):
     print(zip)
     course_list, lat, lon = location_search_helper(zip, length)
@@ -306,7 +306,7 @@ def get_times(zip, length):
     context = {"good_courses": good_courses}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/<string:search>/<string:user>')
+@app.route('/api/v1/search/<string:search>/<string:user>')
 def get_search_results(search, user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -327,7 +327,7 @@ def get_search_results(search, user):
     context = {"results": results} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/users_friends/<string:user>/<string:search>/<string:page>/<string:limit>')
+@app.route('/api/v1/search/users_friends/<string:user>/<string:search>/<string:page>/<string:limit>')
 def get_search_users(user, search, page, limit):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -354,7 +354,7 @@ def get_search_users(user, search, page, limit):
     context = {"results": results, "more": more, "index": index} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/check_cookie/<string:cookie>')
+@app.route('/api/v1/check_cookie/<string:cookie>')
 def get_cookie(cookie):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT username FROM COOKIES WHERE sessionid = %s;", (cookie, ))
@@ -364,14 +364,14 @@ def get_cookie(cookie):
         context = {'username': user[0]}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/delete_cookie/<string:cookie>', methods=["DELETE"])
+@app.route('/api/v1/delete_cookie/<string:cookie>', methods=["DELETE"])
 def delete_cookie(cookie):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "DELETE FROM COOKIES WHERE sessionid = %s;", (cookie, ))
     context = {'message': 'success'}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/send_message', methods = ["POST"])
+@app.route('/api/v1/send_message', methods = ["POST"])
 def send_message():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -382,7 +382,7 @@ def send_message():
     context = {'error': message}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/upd/<string:user>')
+@app.route('/api/v1/search/upd/<string:user>')
 def get_search_friends(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -397,7 +397,7 @@ def get_search_friends(user):
     context = {"results": results, 'index': index, 'requests': requests, 'good_user_times': good_user_times, 'user_friends': friends_in_time} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/only_friends/<string:user>/<string:search>/<string:page>')
+@app.route('/api/v1/search/only_friends/<string:user>/<string:search>/<string:page>')
 def get_only_friends(user, search, page):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -408,7 +408,7 @@ def get_only_friends(user, search, page):
     context = {"results": results} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/send_invite')
+@app.route('/api/v1/send_invite')
 def send_invites():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -418,9 +418,13 @@ def send_invites():
         # cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid1 = U.username AND F.userid2 = '" + user + "') OR (F.userid1 = '" + user + "' AND F.userid2 = U.username)) AND (U.username LIKE '" + search + "%' OR U.firstname LIKE '"
     context = {'error': 'none'}
     return flask.jsonify(**context)
+
+@app.route('/')
+def home():
+    return flask.jsonify({"message": "hello world"})
     
 
-@views.route('/api/v1/in_time/<string:user>/<string:timeid>')
+@app.route('/api/v1/in_time/<string:user>/<string:timeid>')
 def check_in_time(user, timeid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -433,7 +437,7 @@ def check_in_time(user, timeid):
     context = {"time_info": time_info, "in_time": in_time} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/notifications/<string:user>')
+@app.route('/api/v1/notifications/<string:user>')
 def get_notifications(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     username = user_helper(connection, user)
@@ -444,7 +448,7 @@ def get_notifications(user):
     context = {'notifications': notifications, 'imgurl': imageurl}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/booked_times/<string:user>')
+@app.route('/api/v1/booked_times/<string:user>')
 def get_booked_times(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -453,25 +457,25 @@ def get_booked_times(user):
     context = {'times_booked': times_booked}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/add_review', methods=["POST"])
+@app.route('/api/v1/add_review', methods=["POST"])
 def post_review():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, req['user'])
-    cursor = run_query(connection, "INSERT INTO Reviews (username, content, rating, timestamp) VALUES (%s, '%s, %s, CURRENT_TIMESTAMP);", (user, req["description"], req["rating"]))
+    cursor = run_query(connection, "INSERT INTO Reapp (username, content, rating, timestamp) VALUES (%s, '%s, %s, CURRENT_TIMESTAMP);", (user, req["description"], req["rating"]))
     context = {'error': 'none'}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/add_course_review', methods=["POST"])
+@app.route('/api/v1/add_course_review', methods=["POST"])
 def post_course_review():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, req['user'])
-    cursor = run_query(connection, "INSERT INTO CourseReviews (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
+    cursor = run_query(connection, "INSERT INTO CourseReapp (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
     context = {'error': 'none', 'user_readable': user}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/post_post', methods=["POST"])
+@app.route('/api/v1/post_post', methods=["POST"])
 def post_post():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -487,7 +491,7 @@ def get_friend_requests_helper(connection, user, page):
     results = cursor.fetchall()
     return results
 
-@views.route('/api/v1/friend_requests/<string:user>/<string:page>')
+@app.route('/api/v1/friend_requests/<string:user>/<string:page>')
 def get_friend_requests(user, page):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -495,7 +499,7 @@ def get_friend_requests(user, page):
     context = {"results": results} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/courses/<string:search>/<string:page>/<string:limit>')
+@app.route('/api/v1/search/courses/<string:search>/<string:page>/<string:limit>')
 def get_search_courses(search, page, limit):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     search = '%' + search + '%'
@@ -508,7 +512,7 @@ def get_search_courses(search, page, limit):
     context = {"results": results, "last": last} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/any_course/<string:limit>')
+@app.route('/api/v1/search/any_course/<string:limit>')
 def get_some_courses(limit):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT uniqid, coursename FROM COURSES LIMIT %s;", (int(limit), ))
@@ -516,7 +520,7 @@ def get_some_courses(limit):
     context = {"results": results, "last": True} 
     return flask.jsonify(**context)
 
-@views.route('/api/v1/users/<string:user1>/<string:user2>')
+@app.route('/api/v1/users/<string:user1>/<string:user2>')
 def get_user_profile(user1, user2):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user1 = user_helper(connection, user1)
@@ -548,7 +552,7 @@ def get_user_profile(user1, user2):
     context = {"user": user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/teetimes/<string:zip>/<string:date>')
+@app.route('/api/v1/teetimes/<string:zip>/<string:date>')
 def get_swipe_times(zip, date):
     lat, lon = location_search_helper(zip)
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -565,7 +569,7 @@ def get_swipe_times(zip, date):
     context = {'good_courses': good_courses, 'good_times': good_times}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
+@app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
 def get_times_city(lat, lon, date):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT *, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
@@ -581,7 +585,7 @@ def get_times_city(lat, lon, date):
     context = {'good_courses': good_courses, 'good_times': good_times}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/posts/<string:user>/<int:page>')
+@app.route('/api/v1/posts/<string:user>/<int:page>')
 def get_all_posts(user, page):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -595,7 +599,7 @@ def get_all_posts(user, page):
     context = {'posts': posts, 'has_more_posts': more, 'user': user}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/email/<string:email>')
+@app.route('/api/v1/email/<string:email>')
 def check_email(email):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s;", (email, ))
@@ -603,7 +607,7 @@ def check_email(email):
     context = {'is_account': is_account}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course/tee_sheet/<string:courseid>/<string:date>')
+@app.route('/api/v1/course/tee_sheet/<string:courseid>/<string:date>')
 def get_tee_sheet(courseid, date):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseid)
@@ -616,7 +620,7 @@ def get_tee_sheet(courseid, date):
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course/date_transactions/<string:courseid>/<string:date>')
+@app.route('/api/v1/course/date_transactions/<string:courseid>/<string:date>')
 def get_date_transactions(courseid, date):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseid)
@@ -625,7 +629,7 @@ def get_date_transactions(courseid, date):
     context = {'transactions': transactions}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_revenue/<string:courseid>/<string:date1>/<string:date2>')
+@app.route('/api/v1/course_revenue/<string:courseid>/<string:date1>/<string:date2>')
 def get_rev_weekly(courseid, date1, date2):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseid)
@@ -661,7 +665,7 @@ def get_friends_times_helper(connection, userid):
     friends_in_time = friends_in_time_helper(connection, good_user_times, userid)
     return good_user_times, friends_in_time
 
-@views.route('/api/v1/friend_times/<string:userid>')
+@app.route('/api/v1/friend_times/<string:userid>')
 def get_friends_times(userid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     userid = user_helper(connection, userid)
@@ -669,7 +673,7 @@ def get_friends_times(userid):
     context = {'good_user_times': good_user_times, 'user_friends': friends_in_time}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/search/friend_times/<string:userid>/<string:search>')
+@app.route('/api/v1/search/friend_times/<string:userid>/<string:search>')
 def get_friends_times_search(userid, search):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     userid = user_helper(connection, userid)
@@ -691,7 +695,7 @@ def get_friends_times_search(userid, search):
     return flask.jsonify(**context)
 
 
-@views.route('/api/v1/remove_time_spot/<string:timeid>')
+@app.route('/api/v1/remove_time_spot/<string:timeid>')
 def start_transaction(timeid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT spots from Teetimes where timeid = %s;", (timeid, ))
@@ -702,14 +706,14 @@ def start_transaction(timeid):
         context = {'error': 'spot taken'}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/payment_error/<string:timeid>')
+@app.route('/api/v1/payment_error/<string:timeid>')
 def transaction_error(timeid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "UPDATE Teetimes set spots = spots + 1 WHERE timeid = %s;", (timeid, ))
     context = {'error': 'none'}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/swipetimes/users/<string:timeid>')
+@app.route('/api/v1/swipetimes/users/<string:timeid>')
 def get_time_users(timeid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, """SELECT U.username, U.firstname, U.lastname, U.drinking, U.score, U.playstyle, U.descript, 
@@ -718,21 +722,21 @@ def get_time_users(timeid):
     context = {'good_users': good_users}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_info/<string:uniqid>')
+@app.route('/api/v1/course_info/<string:uniqid>')
 def get_course_info(uniqid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (uniqid, ))
     course_info = cursor.fetchone()
-    cursor = run_query(connection, "SELECT * FROM CourseReviews WHERE uniqid = %s ORDER BY TIMESTAMP DESC LIMIT 5", (uniqid, ))
-    reviews = cursor.fetchall()
-    cursor = run_query(connection, "SELECT ROUND(AVG(rating)) FROM CourseReviews WHERE uniqid = %s;", (uniqid, ))
+    cursor = run_query(connection, "SELECT * FROM CourseReapp WHERE uniqid = %s ORDER BY TIMESTAMP DESC LIMIT 5", (uniqid, ))
+    reapp = cursor.fetchall()
+    cursor = run_query(connection, "SELECT ROUND(AVG(rating)) FROM CourseReapp WHERE uniqid = %s;", (uniqid, ))
     avg_rating = cursor.fetchone()[0]
-    context = {'course_info': course_info, 'reviews': reviews, 'rating': avg_rating}
+    context = {'course_info': course_info, 'reapp': reapp, 'rating': avg_rating}
     print(course_info)
     return flask.jsonify(**context)
 
 
-@views.route('/api/v1/courses/<string:courseid>/<string:date>')
+@app.route('/api/v1/courses/<string:courseid>/<string:date>')
 def get_courses_times(courseid, date):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
@@ -743,7 +747,7 @@ def get_courses_times(courseid, date):
     context = {'course_info': course_info, 'course_times': course_times}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/courses/<string:courseid>')
+@app.route('/api/v1/courses/<string:courseid>')
 def get_courses_info(courseid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseid)
@@ -760,7 +764,7 @@ def get_my_friends_helper(connection, user, page):
         has_more = True
     return my_friends, has_more
 
-@views.route('/api/v1/my_friends/<string:user>/<string:page>')
+@app.route('/api/v1/my_friends/<string:user>/<string:page>')
 def get_my_friends(user, page):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -768,7 +772,7 @@ def get_my_friends(user, page):
     context = {'results': my_friends, 'has_more': has_more}
     return flask.jsonify(**context)
 
-# @views.route('/api/v1/login/check_attmpts/<string:user>')
+# @app.route('/api/v1/login/check_attmpts/<string:user>')
 # def check_attmpts(user):
 #     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 #     cursor = run_query(connection, "SELECT loginattmpts FROM USERS WHERE username = '" + user + "';")
@@ -779,7 +783,7 @@ def get_my_friends(user, page):
 #     return flask.jsonify(**context)
 
 
-@views.route('/api/v1/admininfo/<string:user>')
+@app.route('/api/v1/admininfo/<string:user>')
 def admin_info(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = admin_helper(connection, user)
@@ -790,7 +794,7 @@ def admin_info(user):
     money = cursor.fetchone()[0]
 
 
-@views.route('/api/v1/adminlogin/<string:username>/<string:password>')
+@app.route('/api/v1/adminlogin/<string:username>/<string:password>')
 def validate_admin(username, password):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
@@ -831,7 +835,7 @@ def validate_admin(username, password):
             context = {'is_admin': is_admin, 'correct_login': True, 'too_many_attmpts': False, 'cookie': cookie}
             return flask.jsonify(**context)
 
-@views.route('/api/v1/login/<string:username>/<string:password>')
+@app.route('/api/v1/login/<string:username>/<string:password>')
 def validate_user(username, password):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
@@ -872,7 +876,7 @@ def validate_user(username, password):
     return flask.jsonify(**context)
 
 
-@views.route('/api/v1/create', methods =["POST"])
+@app.route('/api/v1/create', methods =["POST"])
 def create_user():
     # dbx.check_and_refresh_access_token()
     req = request.form
@@ -935,7 +939,7 @@ def create_user():
     context = {'error': '', 'cookie': cookie}
     return flask.jsonify(**context)
     
-@views.route('/api/v1/verify_email/<string:code>', methods =["PUT"])
+@app.route('/api/v1/verify_email/<string:code>', methods =["PUT"])
 def verify_email(code):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = translate_verification(connection, code)
@@ -948,7 +952,7 @@ def verify_email(code):
     return flask.jsonify(**context)
     
 
-@views.route('/api/v1/register_course', methods =["POST"])
+@app.route('/api/v1/register_course', methods =["POST"])
 def register_course():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -1007,7 +1011,7 @@ def calculate_order_amount(timeid):
 
 stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJXLmKILzRLYFEr8xY3yXXJRGJSWcIdduPJ5n001apPDssN'
 
-@views.route('/create-payment-intent', methods=['POST'])
+@app.route('/create-payment-intent', methods=['POST'])
 def create_payment():
     data = json.loads(flask.request.data)
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -1028,14 +1032,14 @@ def create_payment():
         'course_info': course_info
     })
 
-@views.route('/api/v1/users/<string:username>')
+@app.route('/api/v1/users/<string:username>')
 def get_single_user(username):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     username = user_helper(connection, username)
     cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, drinking, score, college, playstyle, descript, imageurl FROM USERS WHERE username = %s;", (username, ))
     return flask.jsonify({'user': cursor.fetchone()})
 
-@views.route('/api', methods = ["PUT"])
+@app.route('/api', methods = ["PUT"])
 def inc():
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT * FROM USERS;")
@@ -1044,7 +1048,7 @@ def inc():
         cursor = run_query(connection, "UPDATE USERS SET userid = %s WHERE username = %s;", (str(j), i[0]))
         j = j + 1
 
-@views.route('/api/v1/edit', methods=["PUT"])
+@app.route('/api/v1/edit', methods=["PUT"])
 def edit_user():
     req = request.form
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -1086,7 +1090,7 @@ def edit_user():
     context = {'error': '', 'user': user}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_schedule/<string:courseuser>/<string:day>')
+@app.route('/api/v1/course_schedule/<string:courseuser>/<string:day>')
 def course_profile_data(courseuser, day):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseuser)
@@ -1097,7 +1101,7 @@ def course_profile_data(courseuser, day):
     context = {"course_info": course_info, "tee_sched": tee_time_sched}
     return json.dumps(context, default=str)
 
-@views.route('/api/v1/course_schedule/add/<string:courseid>', methods=["POST"])
+@app.route('/api/v1/course_schedule/add/<string:courseid>', methods=["POST"])
 def course_add_sched(courseuser):
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -1109,7 +1113,7 @@ def course_add_sched(courseuser):
     context = {"message": message}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_schedule/check_day/<string:courseid>/<string:time>')
+@app.route('/api/v1/course_schedule/check_day/<string:courseid>/<string:time>')
 def course_check_days(courseuser, time):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseuser)
@@ -1121,7 +1125,7 @@ def course_check_days(courseuser, time):
     context = {"checked_days": is_checked}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_schedule/holidays/<string:courseuser>/<string:page>')
+@app.route('/api/v1/course_schedule/holidays/<string:courseuser>/<string:page>')
 def course_closed_dates(courseuser, page):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     courseid = user_helper(connection, courseuser)
@@ -1130,7 +1134,7 @@ def course_closed_dates(courseuser, page):
     context = {'closures': closures}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_schedule/holidays/add', methods=["POST"])
+@app.route('/api/v1/course_schedule/holidays/add', methods=["POST"])
 def course_add_closure():
     req = flask.request.json
     print(req)
@@ -1140,7 +1144,7 @@ def course_add_closure():
     context = {'error': ''}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/course_login/<string:email>/<string:password>')
+@app.route('/api/v1/course_login/<string:email>/<string:password>')
 def validate_course_admin(email, password):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT password, uniqid FROM USERS WHERE adminemail = %s;", (email, ))
@@ -1173,7 +1177,7 @@ def validate_course_admin(email, password):
     context = {'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/users/add_friend', methods=["POST"])
+@app.route('/api/v1/users/add_friend', methods=["POST"])
 def create_friend_req():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
@@ -1184,14 +1188,14 @@ def create_friend_req():
     context = {'message': message}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/add_receipt', methods=["POST"])
+@app.route('/api/v1/add_receipt', methods=["POST"])
 def add_receipt():
     req = flask.request.json
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['time'], req['course'], req['cost']))
     return flask.jsonify("")
 
-@views.route('/api/v1/accept_request/<string:accepting_user>/<string:accepted_user>', methods=["POST"])
+@app.route('/api/v1/accept_request/<string:accepting_user>/<string:accepted_user>', methods=["POST"])
 def accept_friend_req(accepting_user, accepted_user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     accepting_user = user_helper(connection, accepting_user)
@@ -1202,7 +1206,7 @@ def accept_friend_req(accepting_user, accepted_user):
     context = {'message': message}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/deny_request/<string:accepting_user>/<string:accepted_user>', methods=["DELETE"])
+@app.route('/api/v1/deny_request/<string:accepting_user>/<string:accepted_user>', methods=["DELETE"])
 def deny_friend_req(accepting_user, accepted_user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "DELETE FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (accepted_user, accepting_user))
@@ -1236,7 +1240,7 @@ def getThreeWeeks():
         day = (day + 21) % 31
     return str(year) + '-' + str(month) + '-' + str(day)
 
-@views.route('/api/v1/messages/<string:user1>/<string:user2>/<string:page>/<string:offset>')
+@app.route('/api/v1/messages/<string:user1>/<string:user2>/<string:page>/<string:offset>')
 def get_messages(user1, user2, page, offset):
     print(offset)
     x = 20*int(page) + int(offset)
@@ -1255,7 +1259,7 @@ def get_messages(user1, user2, page, offset):
     context = {'messages': messages, 'last': last, 'logged_user': user1}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/message_previews/<string:user>')
+@app.route('/api/v1/message_previews/<string:user>')
 def get_message_previews(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -1287,7 +1291,7 @@ def get_message_previews(user):
     context = {'messages': messages, 'last': last}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/posts/<string:user>')
+@app.route('/api/v1/posts/<string:user>')
 def get_posts(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -1299,7 +1303,7 @@ def get_posts(user):
     context = {'has_more': more, 'posts': posts, 'user': user}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/message_count/<string:user1>/<string:user2>')
+@app.route('/api/v1/message_count/<string:user1>/<string:user2>')
 def get_message_count(user1, user2):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT COUNT(*) FROM Messages WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = %s AND userid1 = %s);", (user1, user2, user1, user2))
@@ -1307,7 +1311,7 @@ def get_message_count(user1, user2):
     context = {'count': count}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/admins/')
+@app.route('/api/v1/admins/')
 def get_admins():
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT username FROM ADMINS")
@@ -1315,7 +1319,7 @@ def get_admins():
     context = {'admins': admins}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/my_prof/<string:user>')
+@app.route('/api/v1/my_prof/<string:user>')
 def get_my_times(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -1330,7 +1334,7 @@ def get_my_times(user):
     context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/my_posts/<string:user>')
+@app.route('/api/v1/my_posts/<string:user>')
 def get_my_posts(user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -1342,7 +1346,7 @@ def get_my_posts(user):
     context = {'my_posts': my_posts, 'has_more_posts': has_more_posts}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/teetime/<string:timeid>/<string:user>')
+@app.route('/api/v1/teetime/<string:timeid>/<string:user>')
 def get_time_info(timeid, user):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     user = user_helper(connection, user)
@@ -1360,7 +1364,7 @@ def get_time_info(timeid, user):
     context = {"time_info": time_info, 'in_time': in_time}
     return flask.jsonify(**context)
 
-@views.route('/api/v1/payment_confirmed/<string:timeid>', methods = ["PUT"])
+@app.route('/api/v1/payment_confirmed/<string:timeid>', methods = ["PUT"])
 def change_spots(timeid):
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
     cursor = run_query(connection, "SELECT spots FROM teetimes WHERE timeid = %s;", (timeid, ))
