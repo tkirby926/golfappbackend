@@ -1,29 +1,15 @@
 from __init__ import create_app
-from app import create_server_connection, run_query, getThreeWeeks
+from views import create_server_connection, run_query, getThreeWeeks
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import flask
 import datetime
 import threading
 import time
-import schedule
 
 # def run_threaded(job_func):
 #     job_thread = threading.Thread(target=job_func)
 #     job_thread.start()
-
-def job():
-    print("hi")
-    connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
-    cursor = run_query(connection, "SELECT * FROM COURSES;")
-    courses = cursor.fetchall()
-    three_weeks = getThreeWeeks()
-    for i in courses:
-        cursor = run_query(connection, "SELECT * FROM TEETIMESCHEDULE WHERE course_id = '" + str(i[0]) + "' AND days ='" + str(datetime.datetime.today().weekday()) + "';")
-        sched = cursor.fetchall()
-        for j in sched:
-            cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + str(i[0]) + "', '" + str(three_weeks) + " " + str(j[2]) + "', '" + str(j[3]) + "', 4);")
-    context = {'message': 'completed nightly batch'}
 
 
 app = create_app()
