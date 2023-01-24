@@ -1046,7 +1046,8 @@ def create_user():
     req['firstname'], req['lastname'], req['email'], req['drinking'], req['score'], req['playstyle'], 
     req['descript'], req['college'], image_url))
     cookie = set_verification(req['username'])
-    context = {'error': '', 'cookie': cookie}
+    context = flask.jsonify({'error': '', 'cookie': cookie})
+    context.headers.add('Access-Control-Allow-Origin', '*')
     return flask.jsonify(**context)
     
 @app.route('/api/v1/verify_email/<string:code>', methods =["PUT"])
