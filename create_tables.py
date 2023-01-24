@@ -1,7 +1,7 @@
 from app import create_server_connection, run_query
 
 def create_tables():
-    connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
+    connection = create_server_connection()
     cursor = run_query(connection, """CREATE TABLE `teetimes` (
         `timeid` int NOT NULL AUTO_INCREMENT,
         `teetime` datetime DEFAULT NULL,

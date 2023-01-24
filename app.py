@@ -5,6 +5,7 @@ import pgeocode
 from haversine import haversine
 import random
 from PIL import Image
+from create_tables import create_tables
 import base64
 import requests
 import io
@@ -17,6 +18,8 @@ import random, string
 
 
 BUCKET = 'golftribephotos'
+
+create_tables()
 
 def job2():
     return
