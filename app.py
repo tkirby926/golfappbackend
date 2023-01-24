@@ -14,6 +14,7 @@ import stripe
 import datetime
 from apscheduler.triggers.cron import CronTrigger
 import random, string
+from flask_cors import CORS
 
 
 BUCKET = 'golftribephotos'
@@ -282,6 +283,7 @@ def translate_verification(connection, user):
 
 
 app = flask.Flask(__name__)
+cors = CORS(app)
 
 if __name__ == '__main__':
     app.run()
@@ -1502,3 +1504,4 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
+
