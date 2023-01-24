@@ -487,11 +487,12 @@ def get_friend_requests(user, page):
 @app.route('/api/v1/search/courses/<string:search>/<string:page>/<string:limit>')
 def get_search_courses(search, page, limit):
     connection = create_server_connection()
-    print(connection)
     search = '%' + search + '%'
     cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename, imageurl FROM COURSES WHERE coursename LIKE "
     "%s LIMIT %s OFFSET %s;", (search, int(limit), int(page)*int(limit)))
     results = cursor.fetchall()
+    if (results.length == 0):
+        context = {"results": results, "last": True} 
     last = False
     if len(results) < 20:
         last = True
