@@ -284,12 +284,11 @@ def translate_verification(connection, user):
 app = flask.Flask(__name__)
 
 if __name__ == '__main__':
-    create_tables()
     app.run()
 
 @app.route('/')
 def home():
-    return "Flask app"
+    create_tables()
     # connection = create_server_connection()
     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
     # if flask.session.get('username'):
