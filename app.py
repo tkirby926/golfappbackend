@@ -1,3 +1,4 @@
+
 import flask
 import mysql.connector
 from mysql.connector import Error
@@ -15,7 +16,6 @@ import datetime
 from apscheduler.triggers.cron import CronTrigger
 import random, string
 from flask_cors import CORS
-
 
 BUCKET = 'golftribephotos'
 
@@ -283,7 +283,7 @@ def translate_verification(connection, user):
 
 
 app = flask.Flask(__name__)
-cors = CORS(app)
+CORS(app)
 
 if __name__ == '__main__':
     app.run()
