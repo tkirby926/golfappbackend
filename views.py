@@ -72,6 +72,7 @@ def create_server_connection(host_name, user_name, user_password, db):
     try:
         connection = mysql.connector.connect(
             host=host_name,
+            port='5000',
             user=user_name,
             passwd=user_password,
             database = db
@@ -79,11 +80,12 @@ def create_server_connection(host_name, user_name, user_password, db):
     except Error as err:
         print(f"Error: '{err}'")
     print(connection)
-    print("hi")
+    
     return connection
 
 def run_query(connection, query, variables):
     cursor = connection.cursor(buffered = True)
+    print('hi')
     try:
         cursor.execute(query, variables)
         connection.commit()

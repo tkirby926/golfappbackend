@@ -72,6 +72,7 @@ def create_tables():
         `adminphone` varchar(10) DEFAULT NULL,
         `imageurl` varchar(60) DEFAULT NULL,
         `canedit` char(1) DEFAULT NULL,
+        `auth` char(1) DEFAULT NULL,
         PRIMARY KEY (`uniqid`)
         )""")  
     cursor = run_query(connection, """CREATE TABLE `emailverif` (
