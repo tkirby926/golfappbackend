@@ -173,6 +173,9 @@ import random, string
 
 app = flask.Flask(__name__)
 
+if __name__ == '__main__':
+    app.run()
+
 @app.route('/')
 def home():
     return flask.jsonify({"message": "hello world"})
