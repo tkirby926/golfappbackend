@@ -616,8 +616,6 @@ def get_search_courses(search, page, limit):
     cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename, imageurl FROM COURSES WHERE coursename LIKE "
     "%s LIMIT %s OFFSET %s;", (search, int(limit), int(page)*int(limit)))
     results = cursor.fetchall()
-    if (results.length == 0):
-        context = {"results": results, "last": True} 
     last = False
     if len(results) < 20:
         last = True
