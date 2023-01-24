@@ -171,9 +171,9 @@ import random, string
 #     return username[0]
 
 
-views = flask.Flask(__name__)
+app = flask.Flask(__name__)
 
-@views.route('/')
+@app.route('/')
 def home():
     return flask.jsonify({"message": "hello world"})
 # #     # connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')

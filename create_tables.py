@@ -1,4 +1,4 @@
-from golfappbackend.views import create_server_connection, run_query
+from app import create_server_connection, run_query
 
 def create_tables():
     connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')

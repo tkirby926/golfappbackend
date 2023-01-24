@@ -1,5 +1,5 @@
 from __init__ import create_app
-from views import create_server_connection, run_query, getThreeWeeks
+from app import create_server_connection, run_query, getThreeWeeks
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import flask
