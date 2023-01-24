@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
 @app.route('/')
 def home():
-    return flask.jsonify({"message": "hello world"})
+    return "Flask app"
 # #     # connection = create_server_connection('localhost', 'root', 'playbutton68', 'golfbuddies_data')
 # #     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
 # #     if flask.session.get('username'):
