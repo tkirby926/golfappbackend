@@ -289,6 +289,7 @@ if __name__ == '__main__':
 @app.route('/')
 def home():
     create_tables()
+    return 'flask app'
     # connection = create_server_connection()
     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
     # if flask.session.get('username'):
