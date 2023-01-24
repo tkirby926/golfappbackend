@@ -19,7 +19,7 @@ import random, string
 
 BUCKET = 'golftribephotos'
 
-create_tables()
+
 
 def job2():
     return
@@ -163,6 +163,7 @@ def translate_verification(connection, user):
 app = flask.Flask(__name__)
 
 if __name__ == '__main__':
+    create_tables()
     app.run()
 
 @app.route('/')
