@@ -171,7 +171,7 @@ import random, string
 #     return username[0]
 
 
-# views = Blueprint('views', __name__)
+views = flask.Flask(__name__)
 
 @views.route('/')
 def home():
