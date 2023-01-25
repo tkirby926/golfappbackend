@@ -992,6 +992,7 @@ def validate_user(username, password):
 def create_user():
     # dbx.check_and_refresh_access_token()
     req = flask.request.form
+    print(req['username'])
     if len(req['username']) < 6 or len(req['username']) > 15:
         context = {'error': 'Username must be between 6 and 15 characters'}
         return flask.jsonify(**context)
@@ -1025,7 +1026,6 @@ def create_user():
                                                 pass_dict['salt'],
                                                 pass_dict['pass_hash']])
     image_url = ''
-    print(req['hasphoto'])
     if (req['hasphoto'] == '1'):
         r = Image.open(flask.request.files['file'])
         r_usuable = r.convert('RGB')
