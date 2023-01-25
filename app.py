@@ -1323,6 +1323,7 @@ def accept_friend_req(accepting_user, accepted_user):
 @app.route('/api/v1/deny_request/<string:accepting_user>/<string:accepted_user>', methods=["DELETE"])
 def deny_friend_req(accepting_user, accepted_user):
     connection = create_server_connection()
+    accepting_user = user_helper(connection, accepting_user)
     cursor = run_query(connection, "DELETE FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (accepted_user, accepting_user))
     message = "completed"
     context = {'message': message}
