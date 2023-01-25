@@ -1043,14 +1043,13 @@ def create_user():
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
-    email, drinking, score, playstyle, descript, college, imageurl, active) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0');", (req['username'], pass_dict['password_db_string'], 
+    email, drinking, score, playstyle, descript, college, imageurl, active, loginattmpts) VALUES (%s, """ +
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', '0');", (req['username'], pass_dict['password_db_string'], 
     req['firstname'], req['lastname'], req['email'], req['drinking'], req['score'], req['playstyle'], 
     req['descript'], req['college'], image_url))
     cookie = set_verification(req['username'])
     context = flask.jsonify({'error': '', 'cookie': cookie})
-    context.headers.add('Access-Control-Allow-Origin', '*')
-    return flask.jsonify(**context)
+    return context
     
 @app.route('/api/v1/verify_email/<string:code>', methods =["PUT"])
 def verify_email(code):
