@@ -594,7 +594,7 @@ def post_post():
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
     cursor = run_query(connection, "INSERT INTO POSTS (content, username, timestamp, link) VALUES (%s, %s, CURRENT_TIMESTAMP, %s);", (req['content'], user, req['link']))
-    cursor = run_query(connection, "SELECT CURRENT_TIMESTAMP;")
+    cursor = run_query_basic(connection, "SELECT CURRENT_TIMESTAMP;")
     context = {'error': 'none', 'curtime': cursor.fetchone()}
     return flask.jsonify(**context)
 
