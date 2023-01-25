@@ -774,7 +774,7 @@ def get_friends_times_helper(connection, userid):
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
                                    " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                     "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) LIMIT 2;", (userid, userid))
-    good_user_times = list(cursor.fetchall())
+    good_user_times = cursor.fetchall()
     friends_in_time = friends_in_time_helper(connection, good_user_times, userid)
     return good_user_times, friends_in_time
 
