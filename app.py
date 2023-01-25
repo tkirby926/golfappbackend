@@ -952,7 +952,7 @@ def validate_user(username, password):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
-    if (len(data) == 0):
+    if (data is None):
         context = {'is_user': False, 'correct_login': False, 'too_many_attmpts': False}
         return flask.jsonify(**context)
     if (data[1] >= 5):
@@ -1044,7 +1044,7 @@ def create_user():
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
     email, drinking, score, playstyle, descript, college, imageurl, active, loginattmpts) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', '0');", (req['username'], pass_dict['password_db_string'], 
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (req['username'], pass_dict['password_db_string'], 
     req['firstname'], req['lastname'], req['email'], req['drinking'], req['score'], req['playstyle'], 
     req['descript'], req['college'], image_url))
     cookie = set_verification(req['username'])
@@ -1503,4 +1503,3 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
-
