@@ -9,6 +9,7 @@ from PIL import Image
 import base64
 import requests
 import io
+import requests
 import uuid
 import hashlib
 import stripe
@@ -992,7 +993,7 @@ def validate_user(username, password):
 def create_user():
     # dbx.check_and_refresh_access_token()
     req = flask.request.form
-    print(req['username'])
+    print(req)
     if len(req['username']) < 6 or len(req['username']) > 15:
         context = {'error': 'Username must be between 6 and 15 characters'}
         return flask.jsonify(**context)
