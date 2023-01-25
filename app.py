@@ -511,14 +511,6 @@ def get_search_friends(user):
     results = results + rest
     requests = get_friend_requests_helper(connection, user, '0')
     good_user_times, friends_in_time = get_friends_times_helper(connection, user)
-    print(results)
-    print('hi')
-    print(requests)
-    print('hi')
-    print(good_user_times)
-    print('hi')
-    print(friends_in_time)
-    print('hi')
     context = {"results": results, 'index': index, 'requests': requests, 'good_user_times': good_user_times, 'user_friends': friends_in_time} 
     return flask.jsonify(**context)
 
@@ -993,6 +985,7 @@ def validate_user(username, password):
             correct_login = True
             cursor = run_query(connection, "UPDATE USERS set loginattmpts = 0 WHERE username = %s;", (username, ))
             cookie = make_cookie(username, '1')
+    print(correct_login)
     context = {'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie}
     return flask.jsonify(**context)
 
