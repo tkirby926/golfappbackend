@@ -642,6 +642,9 @@ def get_some_courses(limit):
 def get_user_profile(user1, user2):
     connection = create_server_connection()
     user1 = user_helper(connection, user1)
+    is_logged_user = False
+    if user1 == user2:
+        is_logged_user = True
     cursor = run_query(connection, "SELECT username, firstname, lastname, drinking, score, playstyle, descript, college, imageurl FROM USERS WHERE username=%s;", (user2, ))
     user = cursor.fetchone()
     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
@@ -667,7 +670,7 @@ def get_user_profile(user1, user2):
             if (cursor.fetchone()[0] == 0):
                 status = "n"
         
-    context = {"user": user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
+    context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>')
