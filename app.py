@@ -510,7 +510,7 @@ def get_search_friends(user):
     results = cursor.fetchall()
     index = len(results)
     print(results)
-    cursor = run_query(connection, "SELECT DISTINCT username, firstname, lastname, imageurl FROM USERS U WHERE username NOT IN (SELECT username FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) LIMIT %s;", (user, user, 8 - len(results)))
+    cursor = run_query(connection, "SELECT DISTINCT username, firstname, lastname, imageurl FROM USERS U WHERE username NOT IN (SELECT username FROM USERS U, Friendships F WHERE U.Username = %s OR ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) LIMIT %s;", (user, user, user, 8 - len(results)))
     rest = cursor.fetchall()
     print(rest)
     results = results + rest
