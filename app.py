@@ -1301,6 +1301,9 @@ def create_friend_req():
     req = flask.request.json
     connection = create_server_connection()
     poster = user_helper(connection, req['poster'])
+    if poster == req['receiver']:
+        context = {'message': 'same user error'}
+        return flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO REQUESTEDFRIENDS (username1, username2) VALUES (%s, %s);", (poster, req['receiver']))
     cursor = run_query(connection, "UPDATE USERS SET notifications = notifications + 1 WHERE username = %s;", (req['receiver'], ))
     message = "completed"
