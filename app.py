@@ -24,7 +24,6 @@ BUCKET = 'golftribephotos'
 def create_tables():
     connection = create_server_connection()
     print('yoink')
-    cursor = run_query_basic(connection, "DELETE * FROM USERS")
     cursor = run_query_basic(connection, """CREATE TABLE teetimes (
         timeid int NOT NULL AUTO_INCREMENT,
         teetime datetime DEFAULT NULL,
