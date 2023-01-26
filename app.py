@@ -15,6 +15,7 @@ import hashlib
 import stripe
 import datetime
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.schedulers.background import BackgroundScheduler
 import random, string
 from flask_cors import CORS
 
@@ -176,9 +177,9 @@ trigger = CronTrigger(
 #         year="*", month="*", day="*", hour="*", minute="*", second=0
 # )
 # scheduler = BackgroundScheduler(daemon=False)
-# scheduler.start()
-# scheduler.add_job(func=job, trigger=trigger)
-# scheduler.add_job(func=job2, trigger=trigger2)
+scheduler.start()
+scheduler.add_job(func=job, trigger=trigger)
+scheduler.add_job(func=job2, trigger=trigger2)
 
 def create_server_connection():
     connection = None
