@@ -960,7 +960,7 @@ def validate_admin(username, password):
 @app.route('/api/v1/login/<string:username>/<string:password>')
 def validate_user(username, password):
     connection = create_server_connection()
-    username = np.char.lower(username)
+    username = str(np.char.lower(username))
     cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
     if (data is None):
