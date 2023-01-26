@@ -1389,6 +1389,8 @@ def get_messages(user1, user2, page, offset):
 def get_message_previews(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    print(user)
+    print('yeehaw')
     cursor = run_query(connection, "SELECT max(messageid) FROM Messages WHERE userid1 = %s OR userid2 = %s GROUP BY userid1, userid2;", (user, user))
     interim = [item[0] for item in cursor.fetchall()]
     print(interim)
