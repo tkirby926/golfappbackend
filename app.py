@@ -177,9 +177,7 @@ trigger = CronTrigger(
 #         year="*", month="*", day="*", hour="*", minute="*", second=0
 # )
 # scheduler = BackgroundScheduler(daemon=False)
-scheduler.start()
-scheduler.add_job(func=job, trigger=trigger)
-scheduler.add_job(func=job2, trigger=trigger2)
+
 
 def create_server_connection():
     connection = None
@@ -293,6 +291,8 @@ if __name__ == '__main__':
 @app.route('/')
 def home():
     create_tables()
+    scheduler.start()
+    scheduler.add_job(func=job, trigger=trigger)
     return 'flask app'
     # connection = create_server_connection()
     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
