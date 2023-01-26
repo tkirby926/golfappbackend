@@ -491,6 +491,7 @@ def delete_cookie(cookie):
 @app.route('/api/v1/send_message', methods = ["POST"])
 def send_message():
     req = flask.request.json
+    print(req)
     connection = create_server_connection()
     user = user_helper(connection, req['user1'])
     cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp) VALUES (%s, %s, %s, CURRENT_TIMESTAMP);", (req['message'], user, req['user2']))
