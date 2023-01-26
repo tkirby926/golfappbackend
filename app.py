@@ -1018,7 +1018,8 @@ def create_user():
         context = {'error': 'Last name can only contain letters'}
         return flask.jsonify(**context)
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE username = %s;", (req['username'], ))
+    username = str(np.char.lower(req['username']))
+    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE username = %s;", (username, ))
     if cursor.fetchone()[0] == 1:
         context = {'error': 'Username taken, please try another'}
         return flask.jsonify(**context)
@@ -1056,10 +1057,10 @@ def create_user():
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
     email, drinking, score, playstyle, descript, college, imageurl, active, loginattmpts) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (req['username'], pass_dict['password_db_string'], 
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
     req['firstname'], req['lastname'], req['email'], req['drinking'], req['score'], req['playstyle'], 
     req['descript'], req['college'], image_url))
-    cookie = set_verification(req['username'])
+    cookie = set_verification(username)
     context = flask.jsonify({'error': '', 'cookie': cookie})
     return context
     
