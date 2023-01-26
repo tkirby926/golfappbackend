@@ -170,9 +170,6 @@ def job():
 # app_secret = "hsspgilce6up444"
 # dbx = dropbox.Dropbox(oauth2_refresh_token=refresh_token, app_key=app_key, app_secret=app_secret)
 imgbbkey = '5acb680159cbebee2e67690c18137e89'
-trigger = CronTrigger(
-        year="*", month="*", day="*", hour="*", minute="*", second=5
-)
 # trigger2 = CronTrigger(
 #         year="*", month="*", day="*", hour="*", minute="*", second=0
 # )
@@ -291,6 +288,10 @@ if __name__ == '__main__':
 @app.route('/')
 def home():
     create_tables()
+    trigger = CronTrigger(
+        year="*", month="*", day="*", hour=3, minute=0, second=0
+    )
+    scheduler = BackgroundScheduler(daemon=False)
     scheduler.start()
     scheduler.add_job(func=job, trigger=trigger)
     return 'flask app'
