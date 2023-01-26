@@ -1409,6 +1409,7 @@ def get_message_previews(user):
             if i[0][0] not in matching_users:
                 last_messages_filtered.append([i[0][3], i[0][2]])
                 matching_users.append(i[0][0])
+    print(last_messages_filtered)
     context = {'last_messages': last_messages_filtered, 'matching_users': matching_users}
     return flask.jsonify(**context)
 
