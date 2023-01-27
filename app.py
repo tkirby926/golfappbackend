@@ -41,13 +41,19 @@ def create_tables():
         firstname varchar(30) DEFAULT NULL,
         lastname varchar(30) DEFAULT NULL,
         email varchar(40) DEFAULT NULL,
-        password varchar(180) DEFAULT NULL,
+        password varchar(40) DEFAULT NULL,
         created datetime DEFAULT CURRENT_TIMESTAMP,
         drinking varchar(40) DEFAULT NULL,
         score varchar(40) DEFAULT NULL,
         playstyle varchar(40) DEFAULT NULL,
         descript text,
         college varchar(40) DEFAULT NULL,
+        favteam varchar(50) DEFAULT NULL,
+        favgolf varchar(50) DEFAULT NULL,
+        favcourse varchar(50) DEFAULT NULL,
+        wager varchar(5) DEFAULT NULL,
+        music varchar(5) DEFAULT NULL,
+        cart varchar(5) DEFAULT NULL,
         notifications int DEFAULT NULL,
         loginattmpts int DEFAULT NULL,
         imageurl varchar(60) DEFAULT NULL,
@@ -435,9 +441,6 @@ def get_search_results(search, user):
     cursor = run_query(connection, "SELECT username, firstname, lastname, imageurl FROM USERS WHERE username != %s AND (username LIKE %s OR firstname LIKE %s OR lastname LIKE %s OR CONCAT(firstname, ' ', lastname) LIKE %s) LIMIT 6;", (user, search, search, search, search))
     results = cursor.fetchall()
     files = []
-    #file = dbx.files_get_thumbnail("/Apps/GolfTribe/User_Profile_Pictures/lgldslag.jpeg")
-    # file = dbx.files_get_thumbnail("/Apps/GolfTribe/User_Profile_Pictures/lgldslag.jpeg")
-    #files.append(s3.get_object(Bucket=BUCKET, Key="helloworld2"))
     search = '%' + search
     if len(results) < 6:
         cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename FROM COURSES WHERE coursename LIKE %s LIMIT 6;", (search, ))
@@ -646,7 +649,7 @@ def get_user_profile(user1, user2):
     is_logged_user = False
     if user1 == user2:
         is_logged_user = True
-    cursor = run_query(connection, "SELECT username, firstname, lastname, drinking, score, playstyle, descript, college, imageurl FROM USERS WHERE username=%s;", (user2, ))
+    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS WHERE username = %s;", (user2, ))
     user = cursor.fetchone()
     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
     posts = cursor.fetchall()
@@ -838,8 +841,7 @@ def transaction_error(timeid):
 @app.route('/api/v1/swipetimes/users/<string:timeid>')
 def get_time_users(timeid):
     connection = create_server_connection()
-    cursor = run_query(connection, """SELECT U.username, U.firstname, U.lastname, U.drinking, U.score, U.playstyle, U.descript, 
-                                    U.college FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND U.username = B.username;""", (timeid, ))
+    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND U.username = B.username;""", (timeid, ))
     good_users = cursor.fetchall()
     context = {'good_users': good_users}
     return flask.jsonify(**context)
@@ -1056,10 +1058,10 @@ def create_user():
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
-    email, drinking, score, playstyle, descript, college, imageurl, active, loginattmpts) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
-    req['firstname'], req['lastname'], req['email'], req['drinking'], req['score'], req['playstyle'], 
-    req['descript'], req['college'], image_url))
+    email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts) VALUES (%s, """ +
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
+    req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
+    req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
     cookie = set_verification(username)
     context = flask.jsonify({'error': '', 'cookie': cookie})
     return context
@@ -1161,7 +1163,7 @@ def create_payment():
 def get_single_user(username):
     connection = create_server_connection()
     username = user_helper(connection, username)
-    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, drinking, score, college, playstyle, descript, imageurl FROM USERS WHERE username = %s;", (username, ))
+    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS WHERE username = %s;", (username, ))
     return flask.jsonify({'user': cursor.fetchone()})
 
 @app.route('/api', methods = ["PUT"])
@@ -1208,9 +1210,10 @@ def edit_user():
         image_url = image_url.replace('\\', '')
         print(image_url)
     cursor = run_query(connection, "UPDATE USERS SET username = %s, firstname = %s, " + 
-    "lastname = %s, email = %s, drinking = %s, score = %s, playstyle = %s, descript = %s, " + 
-    "college = %s, imageurl = %s WHERE username = %s;", (req['username'], req['firstname'], req['lastname'],
-    req['email'], req['drinking'], req['score'], req['playstyle'], req['descript'], req['college'], image_url, user)) 
+    "lastname = %s, email = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
+    "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['username'], req['firstname'], req['lastname'],
+    req['email'],  req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
+    req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
     return flask.jsonify(**context)
@@ -1523,3 +1526,4 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
+
