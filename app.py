@@ -188,10 +188,16 @@ def create_server_connection():
     try:
         connection = mysql.connector.connect(
             host= 'us-cdbr-east-06.cleardb.net',
-            user= 'b380a80c6fe7a5',
-            passwd= '81904452',
-            database = 'heroku_90a8bb89b503017'
+            user= 'b70ec49a1c95b5',
+            passwd= 'c4a56e93',
+            database = 'heroku_a011f68e7b490d2'
         )
+        # connection = mysql.connector.connect(
+        #     host= 'localhost',
+        #     user= 'root',
+        #     passwd= 'playbutton68',
+        #     database = 'golfbuddies_data'
+        # )
     except Error as err:
         print(f"Error: '{err}'")
     print(connection)
@@ -965,6 +971,8 @@ def validate_user(username, password):
     username = str(np.char.lower(username))
     cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
+    print(data)
+    print('yahtzee')
     if (data is None):
         context = {'is_user': False, 'correct_login': False, 'too_many_attmpts': False}
         return flask.jsonify(**context)
