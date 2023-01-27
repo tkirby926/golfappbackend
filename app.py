@@ -996,6 +996,7 @@ def validate_user(username, password):
         pass_dict['hash_obj'].update(pass_dict['pass_salt'].encode('utf-8'))
         pass_dict['pass_hash'] = pass_dict['hash_obj'].hexdigest()
         print(pass_dict['split_pass'][2] + "       ")
+        print("fogle")
         print(pass_dict['pass_hash'])
         cookie = ''
         if pass_dict['split_pass'][2] != pass_dict['pass_hash']:
