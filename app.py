@@ -649,7 +649,7 @@ def get_user_profile(user1, user2):
     is_logged_user = False
     if user1 == user2:
         is_logged_user = True
-    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS WHERE username = %s;", (user2, ))
+    cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (user2, ))
     user = cursor.fetchone()
     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
     posts = cursor.fetchall()
@@ -841,7 +841,7 @@ def transaction_error(timeid):
 @app.route('/api/v1/swipetimes/users/<string:timeid>')
 def get_time_users(timeid):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND U.username = B.username;""", (timeid, ))
+    cursor = run_query(connection, "SELECT username, firstname, lastname, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND U.username = B.username;""", (timeid, ))
     good_users = cursor.fetchall()
     context = {'good_users': good_users}
     return flask.jsonify(**context)
@@ -1163,17 +1163,8 @@ def create_payment():
 def get_single_user(username):
     connection = create_server_connection()
     username = user_helper(connection, username)
-    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart imageurl FROM USERS WHERE username = %s;", (username, ))
+    cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (username, ))
     return flask.jsonify({'user': cursor.fetchone()})
-
-@app.route('/api', methods = ["PUT"])
-def inc():
-    connection = create_server_connection()
-    cursor = run_query(connection, "SELECT * FROM USERS;")
-    j = 1
-    for i in cursor.fetchall():
-        cursor = run_query(connection, "UPDATE USERS SET userid = %s WHERE username = %s;", (str(j), i[0]))
-        j = j + 1
 
 @app.route('/api/v1/edit', methods=["PUT"])
 def edit_user():
@@ -1488,7 +1479,7 @@ def get_time_info(timeid, user):
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl FROM Courses C, Teetimes T WHERE T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
     time_info = list(cursor.fetchone())
-    cursor = run_query(connection, "SELECT U.username, U.firstname, U.lastname, U.email, U.drinking, U.score, U.playstyle, U.descript, U.college, U.imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
+    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
     print(time_info)
     time_users = cursor.fetchall()
     in_time = False
