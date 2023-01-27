@@ -41,7 +41,7 @@ def create_tables():
         firstname varchar(30) DEFAULT NULL,
         lastname varchar(30) DEFAULT NULL,
         email varchar(40) DEFAULT NULL,
-        password varchar(40) DEFAULT NULL,
+        password varchar(180) DEFAULT NULL,
         created datetime DEFAULT CURRENT_TIMESTAMP,
         drinking varchar(40) DEFAULT NULL,
         score varchar(40) DEFAULT NULL,
@@ -188,9 +188,9 @@ def create_server_connection():
     try:
         connection = mysql.connector.connect(
             host= 'us-cdbr-east-06.cleardb.net',
-            user= 'b70ec49a1c95b5',
-            passwd= 'c4a56e93',
-            database = 'heroku_a011f68e7b490d2'
+            user= 'bfe3cdaaca4981',
+            passwd= '5be9fade',
+            database = 'heroku_bc20b7dd82aef37'
         )
         # connection = mysql.connector.connect(
         #     host= 'localhost',
