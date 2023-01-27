@@ -1067,7 +1067,7 @@ def create_user():
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
     email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
     req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
     req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
     cookie = set_verification(username)
