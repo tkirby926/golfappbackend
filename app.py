@@ -506,6 +506,9 @@ def send_message():
     print(req)
     connection = create_server_connection()
     user = user_helper(connection, req['user1'])
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp) VALUES (%s, %s, %s, CURRENT_TIMESTAMP);", (req['message'], user, req['user2']))
     cursor = run_query(connection, "UPDATE USERS SET notifications = notifications + 1 WHERE username = %s;", (req['user2'], ))
     message = ""
@@ -516,6 +519,9 @@ def send_message():
 def get_search_friends(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT username, firstname, lastname, imageurl FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)) LIMIT 8;", (user, user))
     results = cursor.fetchall()
     index = len(results)
@@ -533,6 +539,9 @@ def get_search_friends(user):
 def get_only_friends(user, search, page):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     search = search + '%'
     cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid1 = U.username AND F.userid2 = %s) OR (F.userid1 = %s AND F.userid2 = U.username)) AND (U.username LIKE %s OR U.firstname LIKE " + 
     "%s OR U.lastname LIKE %s OR CONCAT(U.firstname, ' ', U.lastname) LIKE %s) LIMIT 4 OFFSET %s;", (user, user, search, search, search, search, int(page)*3))
@@ -569,6 +578,9 @@ def check_in_time(user, timeid):
 def get_notifications(user):
     connection = create_server_connection()
     username = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT notifications, imageurl FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
     notifications = data[0]
@@ -580,6 +592,9 @@ def get_notifications(user):
 def get_booked_times(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT T.timeid, C.Coursename, T.teetime FROM Courses C, Teetimes T, Bookedtimes B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND B.username = %s ORDER BY teetime;", (user, ))
     times_booked = cursor.fetchall()
     context = {'times_booked': times_booked}
@@ -590,6 +605,9 @@ def post_review():
     req = flask.request.json
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO Reapp (username, content, rating, timestamp) VALUES (%s, '%s, %s, CURRENT_TIMESTAMP);", (user, req["description"], req["rating"]))
     context = {'error': 'none'}
     return flask.jsonify(**context)
@@ -599,6 +617,9 @@ def post_course_review():
     req = flask.request.json
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO CourseReapp (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
     context = {'error': 'none', 'user_readable': user}
     return flask.jsonify(**context)
@@ -608,6 +629,9 @@ def post_post():
     req = flask.request.json
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO POSTS (content, username, timestamp, link) VALUES (%s, %s, CURRENT_TIMESTAMP, %s);", (req['content'], user, req['link']))
     cursor = run_query_basic(connection, "SELECT CURRENT_TIMESTAMP;")
     context = {'error': 'none', 'curtime': cursor.fetchone()}
@@ -623,6 +647,9 @@ def get_friend_requests_helper(connection, user, page):
 def get_friend_requests(user, page):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     results = get_friend_requests_helper(connection, user, page)
     context = {"results": results} 
     return flask.jsonify(**context)
@@ -657,6 +684,9 @@ def get_user_profile(user1, user2):
         is_logged_user = True
     cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (user2, ))
     user = cursor.fetchone()
+    if user1 == False:
+        context = {"user": user, 'logged_user': is_logged_user, "status": 'n', "posts": [], "has_more_posts": False, 'tee_times': [], 'friends_in_time': []}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
     posts = cursor.fetchall()
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
@@ -720,6 +750,9 @@ def get_times_city(lat, lon, date):
 def get_all_posts(user, page):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Posts WHERE username = %s OR username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                     "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user, user, user, page * 5))
     posts = cursor.fetchall()
@@ -742,6 +775,9 @@ def check_email(email):
 def get_tee_sheet(courseid, date):
     connection = create_server_connection()
     courseid = user_helper(connection, courseid)
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT teetime, timeid, cart FROM Teetimes WHERE CAST(teetime AS DATE) = %s AND uniqid = %s;", (date, courseid))
     times = cursor.fetchall()
     users_in_time = []
@@ -755,6 +791,9 @@ def get_tee_sheet(courseid, date):
 def get_date_transactions(courseid, date):
     connection = create_server_connection()
     courseid = user_helper(connection, courseid)
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT L.timestamp, L.cost, L.user, T.teetime FROM Teetimes T, Ledger L WHERE CAST(L.timestamp AS DATE) = %s AND L.uniqid = %s AND L.timeid = T.timeid;", (date, courseid))
     transactions = cursor.fetchall()
     context = {'transactions': transactions}
@@ -764,6 +803,9 @@ def get_date_transactions(courseid, date):
 def get_rev_weekly(courseid, date1, date2):
     connection = create_server_connection()
     courseid = user_helper(connection, courseid)
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT COUNT(cost), SUM(cost), CAST(timestamp AS DATE) from ledger WHERE uniqid = %s" +
                         " AND CAST(timestamp as DATE) > %s AND CAST(timestamp AS DATE) < %s GROUP BY CAST(timestamp AS DATE);", (courseid, date1, date2))
     
@@ -800,6 +842,9 @@ def get_friends_times_helper(connection, userid):
 def get_friends_times(userid):
     connection = create_server_connection()
     userid = user_helper(connection, userid)
+    if userid == False:
+        context = {'good_user_times': [], 'user_friends': []}
+        flask.jsonify(**context)
     good_user_times, friends_in_time = get_friends_times_helper(connection, userid)
     context = {'good_user_times': good_user_times, 'user_friends': friends_in_time}
     return flask.jsonify(**context)
@@ -808,6 +853,9 @@ def get_friends_times(userid):
 def get_friends_times_search(userid, search):
     connection = create_server_connection()
     userid = user_helper(connection, userid)
+    if userid == False:
+        context = {'good_user_times': [], 'user_friends': []}
+        flask.jsonify(**context)
     search = search + '%'
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE (U.username like " + 
     "%s OR U.firstname like %s OR U.lastname like %s OR CONCAT(U.firstname, ' ', U.lastname) like %s) AND ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) LIMIT 2;", (search, search, search, search, userid, userid))
@@ -881,6 +929,9 @@ def get_courses_times(courseid, date):
 def get_courses_info(courseid):
     connection = create_server_connection()
     courseid = user_helper(connection, courseid)
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
     context = {'course_info': course_info}
@@ -898,6 +949,9 @@ def get_my_friends_helper(connection, user, page):
 def get_my_friends(user, page):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'results': [], 'has_more': False}
+        flask.jsonify(**context)
     my_friends, has_more = get_my_friends_helper(connection, user, page)
     context = {'results': my_friends, 'has_more': has_more}
     return flask.jsonify(**context)
@@ -1172,6 +1226,9 @@ def create_payment():
 def get_single_user(username):
     connection = create_server_connection()
     username = user_helper(connection, username)
+    if username == False:
+        context = {'user': False}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT username, password, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (username, ))
     return flask.jsonify({'user': cursor.fetchone()})
 
@@ -1180,6 +1237,9 @@ def edit_user():
     req = flask.request.form
     connection = create_server_connection()
     user = user_helper(connection, req['oldusername'])
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     print(req['username'])
     if len(req['username']) < 6 or len(req['username']) > 15:
         context = {'error': 'Username must be between 6 and 15 characters'}
@@ -1222,6 +1282,9 @@ def edit_user():
 def course_profile_data(courseuser, day):
     connection = create_server_connection()
     courseid = user_helper(connection, courseuser)
+    if courseid == False:
+        context = {'course_info': [], 'tee_sched': []}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT days, time, cost FROM TEETIMESCHEDULE WHERE course_id = %s AND days = %s ORDER BY time;", (courseid, day))
@@ -1234,6 +1297,9 @@ def course_add_sched(courseuser):
     req = flask.request.json
     connection = create_server_connection()
     courseid = user_helper(connection, courseuser)
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     for i in req['days']:
         cursor = run_query(connection, "INSERT INTO TEETIMESCHEDULE (course_id, days, time, cost) VALUES (%s, %s, " +
                         "%s, %s);", (courseid, i, req["time"], req["cost"]))
@@ -1244,10 +1310,13 @@ def course_add_sched(courseuser):
 @app.route('/api/v1/course_schedule/check_day/<string:courseid>/<string:time>')
 def course_check_days(courseuser, time):
     connection = create_server_connection()
+    is_checked = [False, False, False, False, False, False, False]
     courseid = user_helper(connection, courseuser)
+    if courseid == False:
+        context = {'not_user': True, 'checked_days': is_checked}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT days FROM TEETIMESCHEDULE WHERE course_id = %s AND time = %s;", (courseid, time))
     checked_days = cursor.fetchall()
-    is_checked = [False, False, False, False, False, False, False]
     for i in checked_days:
         is_checked[i] = True
     context = {"checked_days": is_checked}
@@ -1257,6 +1326,9 @@ def course_check_days(courseuser, time):
 def course_closed_dates(courseuser, page):
     connection = create_server_connection()
     courseid = user_helper(connection, courseuser)
+    if courseid == False:
+        context = {'closures': [], 'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM COURSECLOSEDDATES WHERE uniqid = %s and date > CURRENT_TIMESTAMP ORDER BY date LIMIT 6 OFFSET %s;", (courseid, int(page)*5))
     closures = cursor.fetchall()
     context = {'closures': closures}
@@ -1268,6 +1340,9 @@ def course_add_closure():
     print(req)
     connection = create_server_connection()
     courseid = user_helper(connection, req['user'])
+    if courseid == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO COURSECLOSEDDATES (date, uniqid) VALUES (%s, %s);", (req['date'], courseid))
     context = {'error': ''}
     return flask.jsonify(**context)
@@ -1310,6 +1385,9 @@ def create_friend_req():
     req = flask.request.json
     connection = create_server_connection()
     poster = user_helper(connection, req['poster'])
+    if poster == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     if poster == req['receiver']:
         context = {'message': 'same user error'}
         return flask.jsonify(**context)
@@ -1330,6 +1408,9 @@ def add_receipt():
 def accept_friend_req(accepting_user, accepted_user):
     connection = create_server_connection()
     accepting_user = user_helper(connection, accepting_user)
+    if accepting_user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     users = sorted([accepting_user, accepted_user])
     cursor = run_query(connection, "INSERT INTO FRIENDSHIPS (userid1, userid2) VALUES (%s, %s);", (users[0], users[1]))
     cursor = run_query(connection, "DELETE FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (accepted_user, accepting_user))
@@ -1341,6 +1422,9 @@ def accept_friend_req(accepting_user, accepted_user):
 def deny_friend_req(accepting_user, accepted_user):
     connection = create_server_connection()
     accepting_user = user_helper(connection, accepting_user)
+    if accepting_user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "DELETE FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (accepted_user, accepting_user))
     message = "completed"
     context = {'message': message}
@@ -1379,6 +1463,9 @@ def get_messages(user1, user2, page, offset):
     off = x
     connection = create_server_connection()
     user1 = user_helper(connection, user1)
+    if user1 == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Messages WHERE (userid1 = %s AND userid2 = " + 
                        "%s) OR (userid2 = %s AND userid1 = %s) ORDER BY timestamp DESC LIMIT 21 OFFSET %s;", (user1, user2, user1, user2, off))
     messages = cursor.fetchall()
@@ -1395,6 +1482,9 @@ def get_messages(user1, user2, page, offset):
 def get_message_previews(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True, 'last_messages': [], 'matching_users': []}
+        flask.jsonify(**context)
     print(user)
     print('yeehaw')
     cursor = run_query(connection, "SELECT max(messageid) FROM Messages WHERE userid1 = %s OR userid2 = %s GROUP BY userid1, userid2;", (user, user))
@@ -1421,15 +1511,13 @@ def get_message_previews(user):
     context = {'last_messages': last_messages_filtered, 'matching_users': matching_users}
     return flask.jsonify(**context)
 
-            
-
-    context = {'messages': messages, 'last': last}
-    return flask.jsonify(**context)
-
 @app.route('/api/v1/posts/<string:user>')
 def get_posts(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True, 'posts': [], 'has_more': False, 'user': []}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Posts WHERE username = %s ORDER BY timestamp DESC LIMIT 3;", (user, ))
     posts = cursor.fetchall()
     more = True
@@ -1441,6 +1529,10 @@ def get_posts(user):
 @app.route('/api/v1/message_count/<string:user1>/<string:user2>')
 def get_message_count(user1, user2):
     connection = create_server_connection()
+    user1 = user_helper(connection, user1)
+    if user1 == False:
+        context = {'not_user': True, 'count': 0}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT COUNT(*) FROM Messages WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = %s AND userid1 = %s);", (user1, user2, user1, user2))
     count = cursor.fetchone()[0]
     context = {'count': count}
@@ -1458,6 +1550,9 @@ def get_admins():
 def get_my_times(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True, 'my_times': [], 'my_posts': [], 'has_more_posts': False, 'my_friends': [], 'has_more_friends': False}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Courses C, Teetimes T, BookedTimes B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user, ))
     my_times = cursor.fetchall()
     cursor = run_query(connection, "SELECT * FROM Posts P WHERE P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
@@ -1473,6 +1568,9 @@ def get_my_times(user):
 def get_my_posts(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True, 'my_posts': [], 'has_more_posts': False}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Posts P WHERE P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
     my_posts = cursor.fetchall()
     has_more_posts = False
@@ -1488,6 +1586,9 @@ def get_time_info(timeid, user):
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl FROM Courses C, Teetimes T WHERE T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
     time_info = list(cursor.fetchone())
+    if user == False:
+        context = {'not_user': True, 'in_time': False, 'time_info': time_info}
+        flask.jsonify(**context)
     cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
     print(time_info)
     time_users = cursor.fetchall()
@@ -1526,4 +1627,5 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
+
 
