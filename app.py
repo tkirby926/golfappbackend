@@ -937,8 +937,14 @@ def get_courses_info(courseid):
     context = {'course_info': course_info}
     return flask.jsonify(**context)
 
-def get_my_friends_helper(connection, user, page):
-    cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)) LIMIT 4 OFFSET %s;", (user, user, int(page)*3))
+def get_my_friends_helper(connection, user, page, nonmessage):
+    if nonmessage:
+        cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1 " + 
+        "AND U.username NOT IN (SELECT username FROM USERS U, MESSAGES M WHERE (M.userid1 = U.Username AND M.userid2 = %s) OR (M.userid2 = U.Username AND M.userid1 = %s)))" + 
+        " OR (F.userid1 = %s AND U.Username = F.userid2 AND U.username NOT IN (SELECT username FROM USERS U, MESSAGES M WHERE (M.userid1 = U.Username AND M.userid2 = %s) " +
+        "OR (M.userid2 = U.Username AND M.userid1 = %s)))) LIMIT 4 OFFSET %s;", (user, user, user, user, int(page)*3))
+    else:
+        cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)) LIMIT 4 OFFSET %s;", (user, user, int(page)*3))
     my_friends = cursor.fetchall()
     has_more = False
     if (len(my_friends) == 4):
@@ -952,7 +958,7 @@ def get_my_friends(user, page):
     if user == False:
         context = {'results': [], 'has_more': False}
         flask.jsonify(**context)
-    my_friends, has_more = get_my_friends_helper(connection, user, page)
+    my_friends, has_more = get_my_friends_helper(connection, user, page, False)
     context = {'results': my_friends, 'has_more': has_more}
     return flask.jsonify(**context)
 
@@ -1486,7 +1492,7 @@ def get_message_previews(user):
         context = {'not_user': True, 'last_messages': [], 'matching_users': [], 'my_friends': []}
         flask.jsonify(**context)
     print(user)
-    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0')
+    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0', True)
     print('yeehaw')
     cursor = run_query(connection, "SELECT max(messageid) FROM Messages WHERE userid1 = %s OR userid2 = %s GROUP BY userid1, userid2;", (user, user))
     interim = [item[0] for item in cursor.fetchall()]
@@ -1561,7 +1567,7 @@ def get_my_times(user):
     has_more_posts = False
     if (len(my_posts) == 4):
         has_more_posts: True
-    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0')
+    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0', False)
     context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends}
     return flask.jsonify(**context)
 
@@ -1628,3 +1634,5 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
+
+
