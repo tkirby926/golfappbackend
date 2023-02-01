@@ -1486,7 +1486,7 @@ def get_message_previews(user):
         context = {'not_user': True, 'last_messages': [], 'matching_users': [], 'my_friends': []}
         flask.jsonify(**context)
     print(user)
-    my_friends, has_more_friends = get_my_friends_helper(connection, user)
+    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0')
     print('yeehaw')
     cursor = run_query(connection, "SELECT max(messageid) FROM Messages WHERE userid1 = %s OR userid2 = %s GROUP BY userid1, userid2;", (user, user))
     interim = [item[0] for item in cursor.fetchall()]
