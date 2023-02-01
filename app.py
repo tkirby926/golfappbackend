@@ -1483,9 +1483,10 @@ def get_message_previews(user):
     connection = create_server_connection()
     user = user_helper(connection, user)
     if user == False:
-        context = {'not_user': True, 'last_messages': [], 'matching_users': []}
+        context = {'not_user': True, 'last_messages': [], 'matching_users': [], 'my_friends': []}
         flask.jsonify(**context)
     print(user)
+    my_friends, has_more_friends = get_my_friends_helper(connection, user)
     print('yeehaw')
     cursor = run_query(connection, "SELECT max(messageid) FROM Messages WHERE userid1 = %s OR userid2 = %s GROUP BY userid1, userid2;", (user, user))
     interim = [item[0] for item in cursor.fetchall()]
@@ -1508,7 +1509,7 @@ def get_message_previews(user):
                 last_messages_filtered.append([i[0][3], i[0][2]])
                 matching_users.append(i[0][0])
     print(last_messages_filtered)
-    context = {'last_messages': last_messages_filtered, 'matching_users': matching_users}
+    context = {'my_friends': my_friends, 'has_more_friends': has_more_friends, 'last_messages': last_messages_filtered, 'matching_users': matching_users}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/posts/<string:user>')
@@ -1627,5 +1628,3 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
-
-
