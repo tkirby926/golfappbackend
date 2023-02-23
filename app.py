@@ -1549,12 +1549,12 @@ def get_message_count(user1, user2):
 def get_message_count(user, timeid):
     connection = create_server_connection()
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT COUNT(*) BOOKEDTIMES WHERE username = %s AND timeid = %s", (user, timeid))
+    cursor = run_query(connection, "SELECT COUNT(*) BOOKEDTIMES B, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
     if (cursor.fetchone()[0] == 0):
         context = {"Error": "Not in teetime"}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript," +
-    " wager, cart, imageurl FROM Users U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
+    " wager, cart, imageurl FROM Users U, BOOKEDTIMES B, TEETIMES T WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
     time_users = cursor.fetchall()
     for i in time_users:
         cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = "
