@@ -1545,6 +1545,35 @@ def get_message_count(user1, user2):
     context = {'count': count}
     return flask.jsonify(**context)
 
+@app.route('/api/v1/add_pr_friends/<string:user>/<string:timeid>')
+def get_message_count(user, timeid):
+    connection = create_server_connection()
+    user = user_helper(connection, user)
+    cursor = run_query(connection, "SELECT COUNT(*) BOOKEDTIMES WHERE username = %s AND timeid = %s", (user, timeid))
+    if (cursor.fetchone()[0] == 0):
+        context = {"Error": "Not in teetime"}
+        return flask.jsonify(**context)
+    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript," +
+    " wager, cart, imageurl FROM Users U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
+    time_users = cursor.fetchall()
+    for i in time_users:
+        cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = "
+                                    "%s AND userid1 = %s)", (user, i[0], user, i[0]))
+        status = "f"
+        count = cursor.fetchone()[0]
+        print(count)
+        if (count == 0):
+            status = "p"
+            cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user, i[0]))
+            if (cursor.fetchone()[0] == 0):
+                cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user, i[0]))
+                status = "r"
+                if (cursor.fetchone()[0] == 0):
+                    status = "n"
+        i.append(status)
+    context = {"time_users": time_users}
+    return flask.jsonify(**context)
+
 @app.route('/api/v1/admins/')
 def get_admins():
     connection = create_server_connection()
