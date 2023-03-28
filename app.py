@@ -1549,9 +1549,10 @@ def get_message_count(user1, user2):
 def get_message_count(user, timeid):
     connection = create_server_connection()
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT COUNT(*) BOOKEDTIMES B, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
-    if (cursor.fetchone()[0] == 0):
-        context = {"Error": "Not in teetime"}
+    cursor = run_query(connection, "SELECT T.teetime, C.coursename FROM BOOKEDTIMES B, TEETIMES T, COURSES C WHERE T.uniqid = C.uniqid AND B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
+    general_time_info = cursor.fetchone()
+    if (len(general_time_info) == 0):
+        context = {"error": "Y"}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript," +
     " wager, cart, imageurl FROM Users U, BOOKEDTIMES B, TEETIMES T WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
@@ -1663,5 +1664,4 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
-
 
