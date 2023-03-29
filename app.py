@@ -1546,7 +1546,7 @@ def get_message_count(user1, user2):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/add_pr_friends/<string:user>/<string:timeid>')
-def get_message_count(user, timeid):
+def get_pr(user, timeid):
     connection = create_server_connection()
     user = user_helper(connection, user)
     cursor = run_query(connection, "SELECT T.teetime, C.coursename FROM BOOKEDTIMES B, TEETIMES T, COURSES C WHERE T.uniqid = C.uniqid AND B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
