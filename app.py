@@ -409,7 +409,7 @@ def home():
                 &<string:seconddate_url_slug>&<string:secondtime_url_slug>""")
 def swiper_api(zip_url_slug, length_url_slug, firstdate_url_slug, firsttime_url_slug, 
                seconddate_url_slug, secondtime_url_slug):
-    course_list, lat, lon = location_search_helper(zip_url_slug, length_url_slug)
+    course_list, lat, lon = location_search_helper(zip_url_slug)
     good_courses = []
     connection = create_server_connection( )
     for i in course_list:
@@ -427,7 +427,7 @@ def swiper_api(zip_url_slug, length_url_slug, firstdate_url_slug, firsttime_url_
 @app.route('/api/v1/locations/<string:zip>/<int:length>')
 def get_times(zip, length):
     print(zip)
-    course_list, lat, lon = location_search_helper(zip, length)
+    course_list, lat, lon = location_search_helper(zip)
     good_courses = []
     for i in course_list:
         coord1 = (float(i[2]), float(i[3]))
@@ -440,7 +440,7 @@ def get_times(zip, length):
 
 @app.route('/api/v1/search/<string:search>/<string:user>')
 def get_search_results(search, user):
-    connection = create_server_connection( )
+    connection = create_server_connection()
     user = user_helper(connection, user)
     print(user)
     search = search + '%'
@@ -1164,7 +1164,7 @@ def register_course():
     if count == 1:
         context = {'error': 'Course has already been submitted as is waiting approval. We will contact you shortly and thank you for your patience'}
         return flask.jsonify(**context)
-    course_list, lat, lon = location_search_helper(req['zip'], 25)
+    course_list, lat, lon = location_search_helper(req['zip'])
     pass_dict = {}
     pass_dict['password'] = req['password']
     pass_dict['algorithm'] = 'sha512'
@@ -1548,7 +1548,7 @@ def get_message_count(user1, user2):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/add_pr_friends/<string:user>/<string:timeid>')
-def get_pr(user, timeid):
+def add_pr(user, timeid):
     connection = create_server_connection()
     user = user_helper(connection, user)
     cursor = run_query(connection, "SELECT T.teetime, C.coursename FROM BOOKEDTIMES B, TEETIMES T, COURSES C WHERE T.uniqid = C.uniqid AND B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
@@ -1666,4 +1666,5 @@ def change_spots(timeid):
 #             cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots) VALUES ('" + i[0] + "', '" + three_weeks + " " + i[2] + "', '" + i[3] + "', 4);")
 #     context = {'message': 'completed nightly batch'}
 #     return flask.jsonify("**context")
+
 
