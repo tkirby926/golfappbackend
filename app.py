@@ -1177,7 +1177,7 @@ def register_course():
                                                 pass_dict['salt'],
                                                 pass_dict['pass_hash']])
     image_url = ''
-    print(req['hasphoto'])
+    print(req)
     if (req['hasphoto'] == '1'):
         r = Image.open(flask.request.files['file'])
         r_usuable = r.convert('RGB')
