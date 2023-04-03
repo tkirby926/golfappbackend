@@ -1164,7 +1164,7 @@ def register_course():
     if count == 1:
         context = {'error': 'Course has already been submitted as is waiting approval. We will contact you shortly and thank you for your patience'}
         return flask.jsonify(**context)
-    course_list, lat, lon = location_search_helper(req['zip'])
+    lat, lon = location_search_helper(req['zip'])
     pass_dict = {}
     pass_dict['password'] = req['password']
     pass_dict['algorithm'] = 'sha512'
@@ -1196,7 +1196,7 @@ def register_course():
         image_url = image_url.replace('\\', '')
     cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
     zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, '0', %s, '0');", (req['name'], str(lat), str(lon), req['address'], req['town'], 
+    "%s, %s, %s, %s, %s, %s, %s, %s, %s, '0', %s, '1');", (req['name'], str(lat), str(lon), req['address'], req['town'], 
     req['state'], req['zip'], req['email'], pass_dict['password_db_string'], req['phone'], image_url))
     context = {'error': ''}
     return flask.jsonify(**context)
