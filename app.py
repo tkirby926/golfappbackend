@@ -1153,18 +1153,23 @@ def verify_email(code):
 @app.route('/api/v1/register_course', methods =["POST"])
 def register_course():
     req = flask.request.json
+    print(req)
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT COUNT(*) FROM COURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
     count = cursor.fetchone()[0]
+    print(count)
     if count == 1:
         context = {'error': 'Course has already been registered'}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT COUNT(*) FROM COURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
     count = cursor.fetchone()[0]
+    print(count)
     if count == 1:
         context = {'error': 'Course has already been submitted as is waiting approval. We will contact you shortly and thank you for your patience'}
         return flask.jsonify(**context)
     lat, lon = location_search_helper(req['zip'])
+    print(lat)
+    print(lon)
     pass_dict = {}
     pass_dict['password'] = req['password']
     pass_dict['algorithm'] = 'sha512'
