@@ -1075,31 +1075,42 @@ def validate_user(username, password):
 
 @app.route('/api/v1/create', methods =["POST"])
 def create_user():
-    # dbx.check_and_refresh_access_token()
     req = flask.request.form
-    print(req)
-    if len(req['username']) < 6 or len(req['username']) > 15:
-        context = {'error': 'Username must be between 6 and 15 characters'}
-        return flask.jsonify(**context)
-    if any(not c.isalnum() for c in req['username']):
-        context = {'error': 'Username cannot have special characters (letters and numbers only)'}
-        return flask.jsonify(**context)
-    if not req['firstname'].isalpha():
-        context = {'error': 'First name can only contain letters'}
-        return flask.jsonify(**context)
-    if not req['lastname'].isalpha():
-        context = {'error': 'Last name can only contain letters'}
-        return flask.jsonify(**context)
     connection = create_server_connection()
-    username = str(np.char.lower(req['username']))
-    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE username = %s;", (username, ))
-    if cursor.fetchone()[0] == 1:
-        context = {'error': 'Username taken, please try another'}
-        return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s;", (req['email'], ))
-    if cursor.fetchone()[0] == 1:
-        context = {'error': 'Email has already been linked to an account, please log in'}
-        return flask.jsonify(**context)
+    if req['user'] == '0':
+        if len(req['username']) < 6 or len(req['username']) > 15:
+            context = {'error': 'Username must be between 6 and 15 characters'}
+            return flask.jsonify(**context)
+        if any(not c.isalnum() for c in req['username']):
+            context = {'error': 'Username cannot have special characters (letters and numbers only)'}
+            return flask.jsonify(**context)
+        if not req['firstname'].isalpha():
+            context = {'error': 'First name can only contain letters'}
+            return flask.jsonify(**context)
+        if not req['lastname'].isalpha():
+            context = {'error': 'Last name can only contain letters'}
+            return flask.jsonify(**context)
+        username = str(np.char.lower(req['username']))
+        cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE username = %s;", (username, ))
+        if cursor.fetchone()[0] == 1:
+            context = {'error': 'Username taken, please try another'}
+            return flask.jsonify(**context)
+        cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s;", (req['email'], ))
+        if cursor.fetchone()[0] == 1:
+            context = {'error': 'Email has already been linked to an account, please log in'}
+            return flask.jsonify(**context)
+    else:
+        cursor = run_query(connection, "SELECT COUNT(*) FROM COURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
+        count = cursor.fetchone()[0]
+        if count == 1:
+            context = {'error': 'Course has already been registered'}
+            return flask.jsonify(**context)
+        cursor = run_query(connection, "SELECT COUNT(*) FROM COURSES WHERE coursename = %s AND town = %s AND state = %s;", (req['name'], req['town'], req['state']))
+        count = cursor.fetchone()[0]
+        if count == 1:
+            context = {'error': 'Course has already been submitted as is waiting approval. We will contact you shortly and thank you for your patience'}
+            return flask.jsonify(**context)
+        lat, lon = location_search_helper(req['zip'])
     pass_dict = {}
     pass_dict['password'] = req['password']
     pass_dict['algorithm'] = 'sha512'
@@ -1128,13 +1139,20 @@ def create_user():
         print(res)
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
-    cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
-    email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts) VALUES (%s, """ +
-    "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
-    req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
-    req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
-    cookie = set_verification(username)
-    context = flask.jsonify({'error': '', 'cookie': cookie})
+    if req['user'] == '0':
+        cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
+        email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts) VALUES (%s, """ +
+        "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0);", (username, pass_dict['password_db_string'], 
+        req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
+        req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
+        cookie = set_verification(username)
+        context = flask.jsonify({'error': '', 'cookie': cookie})
+    else:
+        cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
+        zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
+        "%s, %s, %s, %s, %s, %s, %s, %s, %s, '0', %s, '1');", (req['name'], str(lat), str(lon), req['address'], req['town'], 
+        req['state'], req['zip'], req['email'], pass_dict['password_db_string'], req['phone'], image_url))
+        context = flask.jsonify({'error': ''})
     return context
     
 @app.route('/api/v1/verify_email/<string:code>', methods =["PUT"])
