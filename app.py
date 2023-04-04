@@ -1401,8 +1401,6 @@ def validate_course_admin(email, password):
         pass_dict['pass_salt'] = (pass_dict['salt'] + pass_dict['password'])
         pass_dict['hash_obj'].update(pass_dict['pass_salt'].encode('utf-8'))
         pass_dict['pass_hash'] = pass_dict['hash_obj'].hexdigest()
-        print(pass_dict['split_pass'][2] + "       ")
-        print(pass_dict['pass_hash'])
         if pass_dict['split_pass'][2] != pass_dict['pass_hash']:
             correct_login = False
         else:
