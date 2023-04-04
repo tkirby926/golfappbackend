@@ -1394,6 +1394,7 @@ def validate_course_admin(email, password):
         is_user = True
         pass_dict = {}
         pass_dict['split_pass'] = hashed_pass.split("$")
+        print(pass_dict['split_pass'])
         pass_dict['salt'] = pass_dict['split_pass'][1]
         pass_dict['password'] = password
         pass_dict['algorithm'] = 'sha512'
