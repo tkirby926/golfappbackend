@@ -449,7 +449,7 @@ def get_search_results(search, user):
     files = []
     search = '%' + search
     if len(results) < 6:
-        cursor = run_query(connection, "SELECT * FROM COURSES WHERE coursename LIKE %s LIMIT 6;", (search, ))
+        cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename FROM COURSES WHERE coursename LIKE %s LIMIT 6;", (search, ))
         results1 = cursor.fetchall()
         results = results + results1
     print(results)
