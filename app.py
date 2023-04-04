@@ -98,7 +98,7 @@ def create_tables():
         zip varchar(20) DEFAULT NULL,
         state varchar(30) DEFAULT NULL,
         adminemail varchar(40) DEFAULT NULL,
-        adminpassword varchar(20) DEFAULT NULL,
+        adminpassword varchar(180) DEFAULT NULL,
         adminphone varchar(10) DEFAULT NULL,
         imageurl varchar(60) DEFAULT NULL,
         canedit char(1) DEFAULT NULL,
