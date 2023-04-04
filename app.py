@@ -1381,7 +1381,7 @@ def course_add_closure():
 @app.route('/api/v1/course_login/<string:email>/<string:password>')
 def validate_course_admin(email, password):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT password, uniqid FROM COURSES WHERE adminemail = %s;", (email, ))
+    cursor = run_query(connection, "SELECT adminpassword, uniqid FROM COURSES WHERE adminemail = %s;", (email, ))
     data = cursor.fetchone()
     if (len(data) == 0):
         context = {'is_user': False, 'correct_login': False, 'too_many_attmpts': False}
