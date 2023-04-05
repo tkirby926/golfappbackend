@@ -1332,7 +1332,7 @@ def course_add_sched(courseuser):
         context = {'not_user': True}
         flask.jsonify(**context)
     for i in req['days']:
-        cursor = run_query(connection, "INSERT INTO TEETIMESCHEDULE (course_id, days, time, cost) VALUES (%s, %s, " +
+        cursor = run_query(connection, "INSERT INTO TEETIMESCHEDULE (uniqid, days, time, cost) VALUES (%s, %s, " +
                         "%s, %s);", (courseid, i, req["time"], req["cost"]))
     message = cursor.fetchone()
     context = {"message": message}
