@@ -188,9 +188,9 @@ def create_server_connection():
     try:
         connection = mysql.connector.connect(
             host= 'us-cdbr-east-06.cleardb.net',
-            user= 'bfe3cdaaca4981',
-            passwd= '5be9fade',
-            database = 'heroku_bc20b7dd82aef37'
+            user= 'bb21cef3ed34e2',
+            passwd= '820bf529',
+            database = 'heroku_c41f0fef4862901'
         )
         # connection = mysql.connector.connect(
         #     host= 'localhost',
