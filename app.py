@@ -1323,7 +1323,7 @@ def course_profile_data(courseuser, day):
     context = {"course_info": course_info, "tee_sched": tee_time_sched}
     return flask.json.dumps(context, default=str)
 
-@app.route('/api/v1/course_schedule/add/<string:courseid>', methods=["POST"])
+@app.route('/api/v1/course_schedule/add/<string:courseuser>', methods=["POST"])
 def course_add_sched(courseuser):
     req = flask.request.json
     connection = create_server_connection()
