@@ -1032,7 +1032,7 @@ def validate_admin(username, password):
 def validate_user(username, password):
     connection = create_server_connection()
     username = str(np.char.lower(username))
-    cursor = run_query(connection, "SELECT password, loginattmpts FROM USERS WHERE username = %s;", (username, ))
+    cursor = run_query(connection, "SELECT password, loginattmpts, first FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
     print(data)
     print('yahtzee')
@@ -1046,7 +1046,11 @@ def validate_user(username, password):
     is_admin = False
     correct_login = False
     cookie = ''
+    first = False
     hashed_pass = data[0]
+    if (data[2] == '0'):
+        first = True
+        cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
     if hashed_pass is not None:
         is_user = True
         pass_dict = {}
@@ -1070,7 +1074,7 @@ def validate_user(username, password):
             cursor = run_query(connection, "UPDATE USERS set loginattmpts = 0 WHERE username = %s;", (username, ))
             cookie = make_cookie(username, '1')
     print(correct_login)
-    context = {'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie}
+    context = {'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie, 'first': first}
     return flask.jsonify(**context)
 
 
