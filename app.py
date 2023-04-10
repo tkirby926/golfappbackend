@@ -58,6 +58,7 @@ def create_tables():
         loginattmpts int DEFAULT NULL,
         imageurl varchar(60) DEFAULT NULL,
         active char(1) DEFAULT NULL,
+        first char(1) DEFAULT '0',
         PRIMARY KEY (username)
         )""")
 
