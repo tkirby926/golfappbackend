@@ -1048,6 +1048,8 @@ def validate_user(username, password):
     cookie = ''
     first = False
     hashed_pass = data[0]
+    print('ahhhhhhhh')
+    print(data[2])
     if (data[2] == '0'):
         first = True
         cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
