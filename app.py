@@ -151,10 +151,6 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ADD FIRST char(1);
-        )""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET FIRST = '1';
-        )""")
 
 
 def job2():
