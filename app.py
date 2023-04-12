@@ -1062,7 +1062,6 @@ def validate_user(username, password):
     first = False
     hashed_pass = data[0]
     print('ahhhhhhhh')
-    print(data[2])
     if hashed_pass is not None:
         is_user = True
         pass_dict = {}
