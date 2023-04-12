@@ -609,13 +609,19 @@ def post_review():
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
-    cursor = run_query(connection, "INSERT INTO Reapp (username, content, rating, timestamp) VALUES (%s, '%s, %s, CURRENT_TIMESTAMP);", (user, req["description"], req["rating"]))
+    cursor = run_query(connection, "INSERT INTO Reviews (username, content, rating, timestamp) VALUES (%s, '%s, %s, CURRENT_TIMESTAMP);", (user, req["description"], req["rating"]))
     context = {'error': 'none'}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/add_course_review', methods=["POST"])
 def post_course_review():
     req = flask.request.json
+    if len(req['description']) < 100:
+        context = {'error': 'short'}
+        return flask.jsonify(**context)
+    if len(req['description']) > 500:
+        context = {'error': 'long'}
+        return flask.jsonify(**context)
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
     if user == False:
