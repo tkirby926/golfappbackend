@@ -621,7 +621,7 @@ def post_course_review():
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
-    cursor = run_query(connection, "INSERT INTO CourseReapp (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
+    cursor = run_query(connection, "INSERT INTO CourseReviews (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
     context = {'error': 'none', 'user_readable': user}
     return flask.jsonify(**context)
 
