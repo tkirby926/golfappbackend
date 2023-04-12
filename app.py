@@ -587,6 +587,8 @@ def get_notifications(user):
     notifications = data[0]
     imageurl = data[1]
     first = data[2]
+    if first == '0':
+        cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
     context = {'notifications': notifications, 'imgurl': imageurl, 'first': first}
     return flask.jsonify(**context)
 
