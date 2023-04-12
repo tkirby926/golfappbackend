@@ -582,11 +582,12 @@ def get_notifications(user):
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT notifications, imageurl FROM USERS WHERE username = %s;", (username, ))
+    cursor = run_query(connection, "SELECT notifications, imageurl, first FROM USERS WHERE username = %s;", (username, ))
     data = cursor.fetchone()
     notifications = data[0]
     imageurl = data[1]
-    context = {'notifications': notifications, 'imgurl': imageurl}
+    first = data[2]
+    context = {'notifications': notifications, 'imgurl': imageurl, 'first': first}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/booked_times/<string:user>')
