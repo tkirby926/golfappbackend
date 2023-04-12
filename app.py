@@ -587,10 +587,15 @@ def get_notifications(user):
     notifications = data[0]
     imageurl = data[1]
     first = data[2]
-    if first == '0':
-        cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
     context = {'notifications': notifications, 'imgurl': imageurl, 'first': first}
     return flask.jsonify(**context)
+
+@app.route('/api/v1/end_first/<string:user>')
+def end_first(user):
+    connection = create_server_connection()
+    username = user_helper(connection, user)
+    cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
+    return flask.jsonify({'error': 'none'})
 
 @app.route('/api/v1/booked_times/<string:user>')
 def get_booked_times(user):
