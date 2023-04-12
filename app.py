@@ -947,10 +947,9 @@ def get_courses_info(courseid):
 def get_my_friends_helper(connection, user, page, nonmessage):
     my_friends = []
     if nonmessage:
-        cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1 " + 
-        "AND U.username NOT IN (SELECT username FROM USERS U, MESSAGES M WHERE (M.userid1 = U.Username AND M.userid2 = %s) OR (M.userid2 = U.Username AND M.userid1 = %s)))" + 
-        " OR (F.userid1 = %s AND U.Username = F.userid2 AND U.username NOT IN (SELECT username FROM USERS U, MESSAGES M WHERE (M.userid1 = U.Username AND M.userid2 = %s) " +
-        "OR (M.userid2 = U.Username AND M.userid1 = %s)))) LIMIT 4 OFFSET %s;", (user, user, user, user, int(page)*3))
+        cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)) " + 
+        "AND U.username NOT IN (SELECT username FROM USERS U, MESSAGES M WHERE (M.userid1 = U.Username AND M.userid2 = %s) OR (M.userid2 = U.Username AND M.userid1 = %s)) " + 
+        "LIMIT 4 OFFSET %s;", (user, user, user, user, int(page)*3))
         my_friends = cursor.fetchall()
     else:
         cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)) LIMIT 4 OFFSET %s;", (user, user, int(page)*3))
