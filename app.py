@@ -617,10 +617,10 @@ def post_review():
 def post_course_review():
     req = flask.request.json
     if len(req['description']) < 100:
-        context = {'error': 'short'}
+        context = {'error': 'This review is too short to be accepted, please give more detail.'}
         return flask.jsonify(**context)
     if len(req['description']) > 500:
-        context = {'error': 'long'}
+        context = {'error': 'This review is too long, please shorten its content'}
         return flask.jsonify(**context)
     connection = create_server_connection()
     user = user_helper(connection, req['user'])
