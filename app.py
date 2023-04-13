@@ -1087,8 +1087,7 @@ def validate_user(username, password):
             cursor = run_query(connection, "UPDATE USERS set loginattmpts = 0 WHERE username = %s;", (username, ))
             cookie = make_cookie(username, '1')
     print(correct_login)
-    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False})
-    context.set_cookie('username', cookie)
+    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
     return context
 
 
