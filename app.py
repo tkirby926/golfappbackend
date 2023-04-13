@@ -694,6 +694,7 @@ def get_some_courses(limit):
 def get_user_profile(user2):
     connection = create_server_connection()
     user1 = flask.request.cookies.get('username')
+    print(user1)
     user1 = user_helper(connection, user1)
     is_logged_user = False
     if user1 == user2:
@@ -716,7 +717,6 @@ def get_user_profile(user2):
                                     "%s AND userid1 = %s)", (user1, user2, user1, user2))
     status = "f"
     count = cursor.fetchone()[0]
-    print(count)
     if (count == 0):
         status = "p"
         cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user1, user2))
