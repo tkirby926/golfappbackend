@@ -693,7 +693,7 @@ def get_some_courses(limit):
 @app.route('/api/v1/users/friendship/<string:user2>/')
 def get_user_profile(user2):
     connection = create_server_connection()
-    user1 = request.cookies.get('username')
+    user1 = flask.request.cookies.get('username')
     user1 = user_helper(connection, user1)
     is_logged_user = False
     if user1 == user2:
