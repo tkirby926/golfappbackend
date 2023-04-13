@@ -694,7 +694,8 @@ def get_some_courses(limit):
 @app.route('/api/v1/users/friendship/<string:user2>/')
 def get_user_profile(user2):
     connection = create_server_connection()
-    print(flask.request.cookies.get('username'))
+    print(flask.request.cookies)
+    print(flask.request.headers)
     user1 = flask.request.cookies.get('username').split('=')[1]
     print(user1)
     user1 = user_helper(connection, user1)
