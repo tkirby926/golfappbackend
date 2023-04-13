@@ -1095,7 +1095,6 @@ def validate_user(username, password):
     context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
     context = flask.make_response(context)
     context.set_cookie('username', cookie, path='/')
-    context.headers['Access-Control-Allow-Credentials'] = 'true'
     print(context)
     return context
 
