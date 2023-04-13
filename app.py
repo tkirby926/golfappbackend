@@ -673,7 +673,7 @@ def get_friend_requests(user, page):
 def get_search_courses(search, page, limit):
     connection = create_server_connection()
     search = '%' + search + '%'
-    cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename, imageurl FROM COURSES WHERE coursename LIKE "
+    cursor = run_query(connection, "SELECT CONCAT('/course/', uniqid) AS url, coursename, imageurl, street, town, state, zip FROM COURSES WHERE coursename LIKE "
     "%s LIMIT %s OFFSET %s;", (search, int(limit), int(page)*int(limit)))
     results = cursor.fetchall()
     last = False
