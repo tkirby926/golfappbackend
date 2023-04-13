@@ -1090,6 +1090,7 @@ def validate_user(username, password):
     context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
     context = make_response(context)
     context.headers['Access-Control-Allow-Credentials'] = 'true'
+    print(context)
     return context
 
 
