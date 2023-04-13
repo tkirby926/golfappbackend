@@ -294,6 +294,7 @@ def translate_verification(connection, user):
 
 
 app = flask.Flask(__name__)
+app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 CORS(app, supports_credentials = True)
 
 if __name__ == '__main__':
