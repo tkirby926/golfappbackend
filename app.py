@@ -693,44 +693,47 @@ def get_some_courses(limit):
 
 @app.route('/api/v1/users/friendship/<string:user2>/')
 def get_user_profile(user2):
-    connection = create_server_connection()
-    print(flask.request.cookies)
-    print(flask.request.headers)
-    user1 = flask.request.cookies.get('username').split('=')[1]
-    print(user1)
-    user1 = user_helper(connection, user1)
-    is_logged_user = False
-    if user1 == user2:
-        is_logged_user = True
-    cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (user2, ))
-    user = cursor.fetchone()
-    if user1 == False:
-        context = {"user": user, 'logged_user': is_logged_user, "status": 'n', "posts": [], "has_more_posts": False, 'tee_times': [], 'friends_in_time': []}
-        flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
-    posts = cursor.fetchall()
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
-                                   " IN (SELECT timeid FROM BOOKEDTIMES WHERE username = %s);", (user2, ))
-    tee_times = cursor.fetchall()
-    friends_in_time = friends_in_time_helper(connection, tee_times, user1)
-    more = True
-    if (len(posts) != 3):
-        more = False
-    cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = "
-                                    "%s AND userid1 = %s)", (user1, user2, user1, user2))
-    status = "f"
-    count = cursor.fetchone()[0]
-    if (count == 0):
-        status = "p"
-        cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user1, user2))
-        if (cursor.fetchone()[0] == 0):
-            cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user2, user1))
-            status = "r"
-            if (cursor.fetchone()[0] == 0):
-                status = "n"
+#     connection = create_server_connection()
+#     print(flask.request.cookies)
+#     print(flask.request.headers)
+#     user1 = flask.request.cookies.get('username').split('=')[1]
+#     print(user1)
+#     user1 = user_helper(connection, user1)
+#     is_logged_user = False
+#     if user1 == user2:
+#         is_logged_user = True
+#     cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (user2, ))
+#     user = cursor.fetchone()
+#     if user1 == False:
+#         context = {"user": user, 'logged_user': is_logged_user, "status": 'n', "posts": [], "has_more_posts": False, 'tee_times': [], 'friends_in_time': []}
+#         flask.jsonify(**context)
+#     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
+#     posts = cursor.fetchall()
+#     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
+#                                    " IN (SELECT timeid FROM BOOKEDTIMES WHERE username = %s);", (user2, ))
+#     tee_times = cursor.fetchall()
+#     friends_in_time = friends_in_time_helper(connection, tee_times, user1)
+#     more = True
+#     if (len(posts) != 3):
+#         more = False
+#     cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = "
+#                                     "%s AND userid1 = %s)", (user1, user2, user1, user2))
+#     status = "f"
+#     count = cursor.fetchone()[0]
+#     if (count == 0):
+#         status = "p"
+#         cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user1, user2))
+#         if (cursor.fetchone()[0] == 0):
+#             cursor = run_query(connection, "SELECT COUNT(*) FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (user2, user1))
+#             status = "r"
+#             if (cursor.fetchone()[0] == 0):
+#                 status = "n"
+    cookie = flask.request.cookies.get('username')
+    print(cookie)
+    return {}
         
-    context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
-    return flask.jsonify(**context)
+#     context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
+#     return flask.jsonify(**context)
 
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>')
 def get_swipe_times(zip, date):
@@ -1090,8 +1093,8 @@ def validate_user(username, password):
             cookie = make_cookie(username, '1')
     print(correct_login)
     context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
-    context.set_cookie('username', cookie)
     context = flask.make_response(context)
+    context.set_cookie('username', cookie)
     context.headers['Access-Control-Allow-Credentials'] = 'true'
     print(context)
     return context
