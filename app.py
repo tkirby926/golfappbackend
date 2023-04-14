@@ -745,7 +745,7 @@ def get_user_profile(user2):
 @app.route('/api/v1/logout')
 def log_out():
     resp = flask.make_response("Cookie deleted")
-    resp.delete_cookie('username')
+    resp.delete_cookie('username', samesite='None', secure=True)
     return resp
 
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>')
