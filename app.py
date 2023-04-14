@@ -440,9 +440,10 @@ def get_times(zip, length):
     context = {"good_courses": good_courses}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/search/<string:search>/<string:user>')
-def get_search_results(search, user):
+@app.route('/api/v1/search/<string:search>')
+def get_search_results(search):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     print(user)
     search = search + '%'
@@ -458,9 +459,10 @@ def get_search_results(search, user):
     context = {"results": results} 
     return flask.jsonify(**context)
 
-@app.route('/api/v1/search/users_friends/<string:user>/<string:search>/<string:page>/<string:limit>')
-def get_search_users(user, search, page, limit):
+@app.route('/api/v1/search/users_friends/<string:search>/<string:page>/<string:limit>')
+def get_search_users(search, page, limit):
     connection = create_server_connection( )
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     search = search + '%'
     cursor = run_query(connection, "SELECT username, firstname, lastname, imageurl FROM USERS U, Friendships F WHERE ((F.userid1 = U.username AND F.userid2 = %s) OR (F.userid1 = %s AND F.userid2 = U.username)) AND (U.username LIKE %s OR U.firstname LIKE %s OR U.lastname LIKE %s OR CONCAT(U.firstname, ' ', U.lastname) LIKE %s) LIMIT %s OFFSET %s;", (user, user, search, search, search, search, int(limit) + 1, int(page)*int(limit)))
@@ -507,7 +509,8 @@ def send_message():
     req = flask.request.json
     print(req)
     connection = create_server_connection()
-    user = user_helper(connection, req['user1'])
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -517,9 +520,10 @@ def send_message():
     context = {'error': message}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/search/upd/<string:user>')
+@app.route('/api/v1/search/upd')
 def get_search_friends(user):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -537,9 +541,10 @@ def get_search_friends(user):
     context = {"results": results, 'index': index, 'requests': requests, 'good_user_times': good_user_times, 'user_friends': friends_in_time} 
     return flask.jsonify(**context)
 
-@app.route('/api/v1/search/only_friends/<string:user>/<string:search>/<string:page>')
-def get_only_friends(user, search, page):
+@app.route('/api/v1/search/only_friends/<string:search>/<string:page>')
+def get_only_friends(search, page):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -563,9 +568,10 @@ def send_invites():
     return flask.jsonify(**context)
     
 
-@app.route('/api/v1/in_time/<string:user>/<string:timeid>')
-def check_in_time(user, timeid):
+@app.route('/api/v1/in_time/<string:timeid>')
+def check_in_time(timeid):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     cursor = run_query(connection, "SELECT T.teetime, C.Coursename, T.Cost, T.Spots FROM BOOKEDTIMES B, COURSES C, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND C.uniqid = T.uniqid AND T.timeid = B.timeid;", (user, timeid))
     in_time = True
@@ -576,9 +582,10 @@ def check_in_time(user, timeid):
     context = {"time_info": time_info, "in_time": in_time} 
     return flask.jsonify(**context)
 
-@app.route('/api/v1/notifications/<string:user>')
-def get_notifications(user):
+@app.route('/api/v1/notifications')
+def get_notifications():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     username = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -591,16 +598,18 @@ def get_notifications(user):
     context = {'notifications': notifications, 'imgurl': imageurl, 'first': first}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/end_first/<string:user>')
-def end_first(user):
+@app.route('/api/v1/end_first/')
+def end_first():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     username = user_helper(connection, user)
     cursor = run_query(connection, "UPDATE USERS SET first = '1' WHERE username = %s;", (username, ))
     return flask.jsonify({'error': 'none'})
 
-@app.route('/api/v1/booked_times/<string:user>')
-def get_booked_times(user):
+@app.route('/api/v1/booked_times/')
+def get_booked_times():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -614,7 +623,8 @@ def get_booked_times(user):
 def post_review():
     req = flask.request.json
     connection = create_server_connection()
-    user = user_helper(connection, req['user'])
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -632,7 +642,8 @@ def post_course_review():
         context = {'error': 'This review is too long, please shorten its content'}
         return flask.jsonify(**context)
     connection = create_server_connection()
-    user = user_helper(connection, req['user'])
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -644,7 +655,8 @@ def post_course_review():
 def post_post():
     req = flask.request.json
     connection = create_server_connection()
-    user = user_helper(connection, req['user'])
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -659,9 +671,10 @@ def get_friend_requests_helper(connection, user, page):
     results = cursor.fetchall()
     return results
 
-@app.route('/api/v1/friend_requests/<string:user>/<string:page>')
-def get_friend_requests(user, page):
+@app.route('/api/v1/friend_requests/<string:page>')
+def get_friend_requests(page):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -768,9 +781,10 @@ def get_times_city(lat, lon, date):
     context = {'good_courses': good_courses, 'good_times': good_times}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/posts/<string:user>/<int:page>')
-def get_all_posts(user, page):
+@app.route('/api/v1/posts/<int:page>')
+def get_all_posts(page):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
@@ -860,10 +874,11 @@ def get_friends_times_helper(connection, userid):
     friends_in_time = friends_in_time_helper(connection, good_user_times, userid)
     return good_user_times, friends_in_time
 
-@app.route('/api/v1/friend_times/<string:userid>')
-def get_friends_times(userid):
+@app.route('/api/v1/friend_times')
+def get_friends_times():
     connection = create_server_connection()
-    userid = user_helper(connection, userid)
+    user = flask.request.cookies.get('username')
+    userid = user_helper(connection, user)
     if userid == False:
         context = {'good_user_times': [], 'user_friends': []}
         flask.jsonify(**context)
@@ -871,10 +886,11 @@ def get_friends_times(userid):
     context = {'good_user_times': good_user_times, 'user_friends': friends_in_time}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/search/friend_times/<string:userid>/<string:search>')
-def get_friends_times_search(userid, search):
+@app.route('/api/v1/search/friend_times/<string:search>')
+def get_friends_times_search(search):
     connection = create_server_connection()
-    userid = user_helper(connection, userid)
+    user = flask.request.cookies.get('username')
+    userid = user_helper(connection, user)
     if userid == False:
         context = {'good_user_times': [], 'user_friends': []}
         flask.jsonify(**context)
@@ -974,9 +990,10 @@ def get_my_friends_helper(connection, user, page, nonmessage):
         has_more = True
     return my_friends, has_more
 
-@app.route('/api/v1/my_friends/<string:user>/<string:page>')
-def get_my_friends(user, page):
+@app.route('/api/v1/my_friends/<string:page>')
+def get_my_friends(page):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'results': [], 'has_more': False}
@@ -1279,10 +1296,11 @@ def create_payment():
         'course_info': course_info
     })
 
-@app.route('/api/v1/users/<string:username>')
-def get_single_user(username):
+@app.route('/api/v1/users')
+def get_single_user():
     connection = create_server_connection()
-    username = user_helper(connection, username)
+    user = flask.request.cookies.get('username')
+    username = user_helper(connection, user)
     if username == False:
         context = {'user': False}
         flask.jsonify(**context)
@@ -1293,7 +1311,8 @@ def get_single_user(username):
 def edit_user():
     req = flask.request.form
     connection = create_server_connection()
-    user = user_helper(connection, req['oldusername'])
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1440,7 +1459,8 @@ def validate_course_admin(email, password):
 def create_friend_req():
     req = flask.request.json
     connection = create_server_connection()
-    poster = user_helper(connection, req['poster'])
+    user = flask.request.cookies.get('username')
+    poster = user_helper(connection, user)
     if poster == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1460,10 +1480,11 @@ def add_receipt():
     cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['time'], req['course'], req['cost']))
     return flask.jsonify("")
 
-@app.route('/api/v1/accept_request/<string:accepting_user>/<string:accepted_user>', methods=["POST"])
-def accept_friend_req(accepting_user, accepted_user):
+@app.route('/api/v1/accept_request/<string:accepted_user>', methods=["POST"])
+def accept_friend_req(accepted_user):
     connection = create_server_connection()
-    accepting_user = user_helper(connection, accepting_user)
+    user = flask.request.cookies.get('username')
+    accepting_user = user_helper(connection, user)
     if accepting_user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1474,10 +1495,11 @@ def accept_friend_req(accepting_user, accepted_user):
     context = {'message': message}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/deny_request/<string:accepting_user>/<string:accepted_user>', methods=["DELETE"])
-def deny_friend_req(accepting_user, accepted_user):
+@app.route('/api/v1/deny_request/<string:accepted_user>', methods=["DELETE"])
+def deny_friend_req(accepted_user):
     connection = create_server_connection()
-    accepting_user = user_helper(connection, accepting_user)
+    user = flask.request.cookies.get('username')
+    accepting_user = user_helper(connection, user)
     if accepting_user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1512,13 +1534,14 @@ def getThreeWeeks():
         day = (day + 21) % 31
     return str(year) + '-' + str(month) + '-' + str(day)
 
-@app.route('/api/v1/messages/<string:user1>/<string:user2>/<string:page>/<string:offset>')
-def get_messages(user1, user2, page, offset):
+@app.route('/api/v1/messages/<string:user2>/<string:page>/<string:offset>')
+def get_messages(user2, page, offset):
     print(offset)
     x = 20*int(page) + int(offset)
     off = x
     connection = create_server_connection()
-    user1 = user_helper(connection, user1)
+    user = flask.request.cookies.get('username')
+    user1 = user_helper(connection, user)
     if user1 == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1534,9 +1557,10 @@ def get_messages(user1, user2, page, offset):
     context = {'messages': messages, 'last': last, 'logged_user': user1}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/message_previews/<string:user>')
-def get_message_previews(user):
+@app.route('/api/v1/message_previews')
+def get_message_previews():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True, 'last_messages': [], 'matching_users': [], 'my_friends': []}
@@ -1568,9 +1592,10 @@ def get_message_previews(user):
     context = {'my_friends': my_friends, 'has_more_friends': has_more_friends, 'last_messages': last_messages_filtered, 'matching_users': matching_users}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/posts/<string:user>')
-def get_posts(user):
+@app.route('/api/v1/posts')
+def get_posts():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True, 'posts': [], 'has_more': False, 'user': []}
@@ -1583,10 +1608,11 @@ def get_posts(user):
     context = {'has_more': more, 'posts': posts, 'user': user}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/message_count/<string:user1>/<string:user2>')
-def get_message_count(user1, user2):
+@app.route('/api/v1/message_count/<string:user2>')
+def get_message_count(user2):
     connection = create_server_connection()
-    user1 = user_helper(connection, user1)
+    user = flask.request.cookies.get('username')
+    user1 = user_helper(connection, user)
     if user1 == False:
         context = {'not_user': True, 'count': 0}
         flask.jsonify(**context)
@@ -1633,9 +1659,10 @@ def get_admins():
     context = {'admins': admins}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/my_prof/<string:user>')
-def get_my_times(user):
+@app.route('/api/v1/my_prof')
+def get_my_times():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True, 'my_times': [], 'my_posts': [], 'has_more_posts': False, 'my_friends': [], 'has_more_friends': False}
@@ -1651,9 +1678,10 @@ def get_my_times(user):
     context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/my_posts/<string:user>')
-def get_my_posts(user):
+@app.route('/api/v1/my_posts/')
+def get_my_posts():
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True, 'my_posts': [], 'has_more_posts': False}
@@ -1666,9 +1694,10 @@ def get_my_posts(user):
     context = {'my_posts': my_posts, 'has_more_posts': has_more_posts}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/teetime/<string:timeid>/<string:user>')
-def get_time_info(timeid, user):
+@app.route('/api/v1/teetime/<string:timeid>')
+def get_time_info(timeid):
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl FROM Courses C, Teetimes T WHERE T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
