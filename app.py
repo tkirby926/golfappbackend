@@ -599,7 +599,7 @@ def get_notifications():
     notifications = data[0]
     imageurl = data[1]
     first = data[2]
-    context = {'notifications': notifications, 'imgurl': imageurl, 'first': first}
+    context = {'notifications': notifications, 'imgurl': imageurl, 'first': first, 'user': user}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/end_first/')
