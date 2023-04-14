@@ -742,6 +742,12 @@ def get_user_profile(user2):
     context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
     return flask.jsonify(**context)
 
+@app.route('/api/v1/logout')
+def log_out():
+    resp = flask.make_response("Cookie deleted")
+    resp.delete_cookie('username')
+    return resp
+
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>')
 def get_swipe_times(zip, date):
     lat, lon = location_search_helper(zip)
