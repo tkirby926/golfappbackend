@@ -586,11 +586,11 @@ def check_in_time(timeid):
 def get_notifications():
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
-    username = user_helper(connection, user)
+    user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT notifications, imageurl, first FROM USERS WHERE username = %s;", (username, ))
+    cursor = run_query(connection, "SELECT notifications, imageurl, first FROM USERS WHERE username = %s;", (user, ))
     data = cursor.fetchone()
     notifications = data[0]
     imageurl = data[1]
