@@ -587,6 +587,9 @@ def check_in_time(timeid):
 def get_notifications():
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
+    if user is None: 
+        context = {'not_user': True}
+        return flask.jsonify(**context)
     user = user_helper(connection, user)
     if user == False:
         context = {'not_user': True}
