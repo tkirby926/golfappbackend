@@ -791,6 +791,7 @@ def get_all_posts(page):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
+    print(user)
     if user == False:
         context = {'not_user': True}
         flask.jsonify(**context)
