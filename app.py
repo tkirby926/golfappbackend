@@ -1382,7 +1382,7 @@ def course_profile_data(day):
     courseid = user_helper(connection, courseuser)
     print(courseid)
     if courseid == False:
-        context = {'course_info': [], 'tee_sched': []}
+        context = {'not_user': True}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
