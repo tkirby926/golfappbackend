@@ -1115,7 +1115,7 @@ def validate_user(username, password):
             cursor = run_query(connection, "UPDATE USERS set loginattmpts = 0 WHERE username = %s;", (username, ))
             cookie = make_cookie(username, '1')
     print(correct_login)
-    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
+    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False})
     context = flask.make_response(context)
     context.set_cookie('username', cookie, path='/', samesite='None', secure=True)
     print(context)
@@ -1464,7 +1464,7 @@ def validate_course_admin(email, password):
         else:
             correct_login = True
             cookie = make_cookie(data[1], '0')
-    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
+    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False})
     context = flask.make_response(context)
     context.set_cookie('course_user', cookie, path='/', samesite='None', secure=True)
     return context
