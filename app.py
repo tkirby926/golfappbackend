@@ -1365,9 +1365,10 @@ def course_profile_data(day):
     connection = create_server_connection()
     courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
+    print(courseid)
     if courseid == False:
         context = {'course_info': [], 'tee_sched': []}
-        flask.jsonify(**context)
+        return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT days, time, cost FROM TEETIMESCHEDULE WHERE course_id = %s AND days = %s ORDER BY time;", (courseid, day))
