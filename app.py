@@ -1413,6 +1413,7 @@ def course_closed_dates(page):
     connection = create_server_connection()
     courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
+    print(courseid)
     if courseid == False:
         context = {'closures': [], 'not_user': True}
         flask.jsonify(**context)
@@ -1433,6 +1434,7 @@ def course_add_closure():
         flask.jsonify(**context)
     cursor = run_query(connection, "SELECT COUNT(*) FROM COURSECLOSEDDATES WHERE date = %s;", (req['date'], ))
     if cursor.fetchone()[0] == 0:
+        print('yoyoyo')
         cursor = run_query(connection, "INSERT INTO COURSECLOSEDDATES (date, uniqid) VALUES (%s, %s);", (req['date'], courseid))
     context = {'error': ''}
     return flask.jsonify(**context)
