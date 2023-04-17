@@ -813,7 +813,7 @@ def check_email(email):
     context = {'is_account': is_account}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course/tee_sheet/<string:courseid>/<string:date>')
+@app.route('/api/v1/course/tee_sheet/<string:date>')
 def get_tee_sheet(date):
     connection = create_server_connection()
     courseuser = flask.request.cookies.get('course_user')
