@@ -1427,6 +1427,7 @@ def course_add_closure():
     connection = create_server_connection()
     courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
+    print(courseid)
     if courseid == False:
         context = {'not_user': True}
         flask.jsonify(**context)
