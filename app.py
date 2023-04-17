@@ -1431,7 +1431,9 @@ def course_add_closure():
     if courseid == False:
         context = {'not_user': True}
         flask.jsonify(**context)
-    cursor = run_query(connection, "INSERT INTO COURSECLOSEDDATES (date, uniqid) VALUES (%s, %s);", (req['date'], courseid))
+    cursor = run_query(connection, "SELECT COUNT(*) FROM COURSECLOSEDDATES WHERE date = ", (req['date'], ))
+    if cursor.fetchone()[0] == 0:
+        cursor = run_query(connection, "INSERT INTO COURSECLOSEDDATES (date, uniqid) VALUES (%s, %s);", (req['date'], courseid))
     context = {'error': ''}
     return flask.jsonify(**context)
 
