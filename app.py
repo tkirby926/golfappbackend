@@ -749,8 +749,20 @@ def get_user_profile(user2):
 
 @app.route('/api/v1/logout')
 def log_out():
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    cursor = run_query(connection, "DELETE FROM COOKIES WHERE sessionid = %s;", (user, ))
     resp = flask.make_response("Cookie deleted")
     resp.delete_cookie('username', samesite='None', secure=True)
+    return resp
+
+@app.route('/api/v1/course_logout')
+def course_log_out():
+    connection = create_server_connection()
+    user = flask.request.cookies.get('course_user')
+    cursor = run_query(connection, "DELETE FROM COOKIES WHERE sessionid = %s;", (user, ))
+    resp = flask.make_response("Cookie deleted")
+    resp.delete_cookie('course_user', samesite='None', secure=True)
     return resp
 
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>')
