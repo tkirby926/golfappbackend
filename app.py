@@ -1541,21 +1541,19 @@ def getThreeWeeks():
 
 @app.route('/api/v1/messages/<string:user2>/<string:page>/<string:offset>')
 def get_messages(user2, page, offset):
-    print(offset)
-    x = 20*int(page) + int(offset)
-    off = x
+    off = 20*int(page) + int(offset)
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user1 = user_helper(connection, user)
+    print(user1)
+    print('ahh')
     if user1 == False:
         context = {'not_user': True}
         flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Messages WHERE (userid1 = %s AND userid2 = " + 
                        "%s) OR (userid2 = %s AND userid1 = %s) ORDER BY timestamp DESC LIMIT 21 OFFSET %s;", (user1, user2, user1, user2, off))
     messages = cursor.fetchall()
-    print(len(messages))
     last = False
-    print(len(messages) < 21)
     if len(messages) < 21:
         last = True
     messages = messages[0:20]
