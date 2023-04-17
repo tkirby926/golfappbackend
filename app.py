@@ -794,7 +794,7 @@ def get_all_posts(page):
     print(user)
     if user == False:
         context = {'not_user': True}
-        flask.jsonify(**context)
+        return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Posts WHERE username = %s OR username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                     "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user, user, user, page * 5))
     posts = cursor.fetchall()
