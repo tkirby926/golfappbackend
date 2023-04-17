@@ -760,12 +760,12 @@ def get_swipe_times(zip, date):
     cursor = run_query(connection, "SELECT *, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
     good_times = []
-    for i in good_courses:
-        cursor = run_query(connection, "SELECT t.timeid, t.cost, c.coursename FROM TEETIMES t, COURSES c WHERE c.coursename=" +
-                                        "%s AND c.uniqid = t.uniqid AND CAST(teetime AS DATE) = %s AND t.timeid IN (SELECT DISTINCT timeid FROM BOOKEDTIMES);", (i[4], date))
-        good_times = cursor.fetchall()
-        print(good_times)
-        random.shuffle(good_times)
+    # for i in good_courses:
+        # cursor = run_query(connection, "SELECT t.timeid, t.cost, c.coursename FROM TEETIMES t, COURSES c WHERE c.coursename=" +
+                                        # "%s AND c.uniqid = t.uniqid AND CAST(teetime AS DATE) = %s AND t.timeid IN (SELECT DISTINCT timeid FROM BOOKEDTIMES);", (i[4], date))
+        # good_times = cursor.fetchall()
+        # print(good_times)
+        # random.shuffle(good_times)
     print(good_courses)
     context = {'good_courses': good_courses, 'good_times': good_times}
     return flask.jsonify(**context)
