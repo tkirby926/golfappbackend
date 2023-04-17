@@ -757,7 +757,7 @@ def log_out():
 def get_swipe_times(zip, date):
     lat, lon = location_search_helper(zip)
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imgurl, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
+    cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imgurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
     good_times = []
     # for i in good_courses:
