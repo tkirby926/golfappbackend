@@ -1389,7 +1389,7 @@ def course_add_sched():
         cursor = run_query(connection, "INSERT INTO TEETIMESCHEDULE (course_id, days, time, cost) VALUES (%s, %s, " +
                         "%s, %s);", (courseid, i, req["time"], req["cost"]))
     message = cursor.fetchone()
-    context = {"message": message}
+    context = {"error": ""}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/course_schedule/check_day/<string:time>')
@@ -1424,7 +1424,6 @@ def course_closed_dates(page):
 @app.route('/api/v1/course_schedule/holidays/add', methods=["POST"])
 def course_add_closure():
     req = flask.request.json
-    print(req)
     connection = create_server_connection()
     courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
