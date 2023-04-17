@@ -1551,7 +1551,7 @@ def get_messages(user2, page, offset):
         context = {'not_user': True}
         flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * FROM Messages WHERE (userid1 = %s AND userid2 = " + 
-                       "%s) OR (userid2 = %s AND userid1 = %s) ORDER BY timestamp DESC LIMIT 21 OFFSET %s;", (user1, user2, user1, user2, off))
+                       "%s) OR (userid2 = %s AND userid1 = %s) ORDER BY timestamp ASC LIMIT 21 OFFSET %s;", (user1, user2, user1, user2, off))
     messages = cursor.fetchall()
     last = False
     if len(messages) < 21:
