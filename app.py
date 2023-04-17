@@ -1466,7 +1466,7 @@ def validate_course_admin(email, password):
     context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
     context = flask.make_response(context)
     context.set_cookie('course_user', cookie, path='/', samesite='None', secure=True)
-    return flask.jsonify(**context)
+    return context
 
 @app.route('/api/v1/users/add_friend', methods=["POST"])
 def create_friend_req():
