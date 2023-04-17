@@ -237,7 +237,7 @@ def location_search_helper(loc):
 
 def user_helper(connection, user):
     if user is None or user == 'null':
-        return 'null'
+        return False
     cursor = run_query(connection, "SELECT username FROM COOKIES WHERE sessionid = %s;", (user,))
     username = cursor.fetchone()
     if username is None:
