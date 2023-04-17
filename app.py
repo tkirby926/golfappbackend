@@ -757,7 +757,7 @@ def log_out():
 def get_swipe_times(zip, date):
     lat, lon = location_search_helper(zip)
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT *, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
+    cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imgurl, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
     good_times = []
     # for i in good_courses:
@@ -766,7 +766,7 @@ def get_swipe_times(zip, date):
         # good_times = cursor.fetchall()
         # print(good_times)
         # random.shuffle(good_times)
-    print(good_courses)
+    # print(good_courses)
     context = {'good_courses': good_courses, 'good_times': good_times}
     return flask.jsonify(**context)
 
