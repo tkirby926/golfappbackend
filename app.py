@@ -639,6 +639,12 @@ def post_review():
 
 @app.route('/api/v1/add_course_review', methods=["POST"])
 def post_course_review():
+    user = flask.request.cookies.get('username')
+    connection = create_server_connection()
+    user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        flask.jsonify(**context)
     req = flask.request.json
     if len(req['description']) < 100:
         context = {'error': 'This review is too short to be accepted, please give more detail.'}
@@ -646,12 +652,6 @@ def post_course_review():
     if len(req['description']) > 500:
         context = {'error': 'This review is too long, please shorten its content'}
         return flask.jsonify(**context)
-    connection = create_server_connection()
-    user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
-    if user == False:
-        context = {'not_user': True}
-        flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO CourseReviews (username, description, rating, timestamp, uniqid) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, %s);", (user, req["description"], req["rating"], req['courseid']))
     context = {'error': 'none', 'user_readable': user}
     return flask.jsonify(**context)
