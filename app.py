@@ -1360,9 +1360,10 @@ def edit_user():
     context = {'error': '', 'user': user}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course_schedule/<string:courseuser>/<string:day>')
-def course_profile_data(courseuser, day):
+@app.route('/api/v1/course_schedule/<string:day>')
+def course_profile_data(day):
     connection = create_server_connection()
+    courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'course_info': [], 'tee_sched': []}
@@ -1374,10 +1375,11 @@ def course_profile_data(courseuser, day):
     context = {"course_info": course_info, "tee_sched": tee_time_sched}
     return flask.json.dumps(context, default=str)
 
-@app.route('/api/v1/course_schedule/add/<string:courseuser>', methods=["POST"])
-def course_add_sched(courseuser):
+@app.route('/api/v1/course_schedule/add', methods=["POST"])
+def course_add_sched():
     req = flask.request.json
     connection = create_server_connection()
+    courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'not_user': True}
@@ -1389,10 +1391,11 @@ def course_add_sched(courseuser):
     context = {"message": message}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course_schedule/check_day/<string:courseid>/<string:time>')
-def course_check_days(courseuser, time):
+@app.route('/api/v1/course_schedule/check_day/<string:time>')
+def course_check_days(time):
     connection = create_server_connection()
     is_checked = [False, False, False, False, False, False, False]
+    courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'not_user': True, 'checked_days': is_checked}
@@ -1404,9 +1407,10 @@ def course_check_days(courseuser, time):
     context = {"checked_days": is_checked}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course_schedule/holidays/<string:courseuser>/<string:page>')
-def course_closed_dates(courseuser, page):
+@app.route('/api/v1/course_schedule/holidays/<string:page>')
+def course_closed_dates(page):
     connection = create_server_connection()
+    courseuser = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'closures': [], 'not_user': True}
@@ -1421,7 +1425,8 @@ def course_add_closure():
     req = flask.request.json
     print(req)
     connection = create_server_connection()
-    courseid = user_helper(connection, req['user'])
+    courseuser = flask.request.cookies.get('course_user')
+    courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -1458,7 +1463,9 @@ def validate_course_admin(email, password):
         else:
             correct_login = True
             cookie = make_cookie(data[1], '0')
-    context = {'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie}
+    context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False, 'cookie': cookie})
+    context = flask.make_response(context)
+    context.set_cookie('course_user', cookie, path='/', samesite='None', secure=True)
     return flask.jsonify(**context)
 
 @app.route('/api/v1/users/add_friend', methods=["POST"])
