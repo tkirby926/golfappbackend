@@ -814,9 +814,10 @@ def check_email(email):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/course/tee_sheet/<string:courseid>/<string:date>')
-def get_tee_sheet(courseid, date):
+def get_tee_sheet(date):
     connection = create_server_connection()
-    courseid = user_helper(connection, courseid)
+    courseuser = flask.request.cookies.get('course_user')
+    courseid = user_helper(connection, courseuser)
     if courseid == False:
         context = {'not_user': True}
         flask.jsonify(**context)
@@ -829,9 +830,10 @@ def get_tee_sheet(courseid, date):
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course/date_transactions/<string:courseid>/<string:date>')
-def get_date_transactions(courseid, date):
+@app.route('/api/v1/course/date_transactions/<string:date>')
+def get_date_transactions(date):
     connection = create_server_connection()
+    courseid = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseid)
     if courseid == False:
         context = {'not_user': True}
@@ -841,9 +843,10 @@ def get_date_transactions(courseid, date):
     context = {'transactions': transactions}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/course_revenue/<string:courseid>/<string:date1>/<string:date2>')
-def get_rev_weekly(courseid, date1, date2):
+@app.route('/api/v1/course_revenue/<string:date1>/<string:date2>')
+def get_rev_weekly(date1, date2):
     connection = create_server_connection()
+    courseid = flask.request.cookies.get('course_user')
     courseid = user_helper(connection, courseid)
     if courseid == False:
         context = {'not_user': True}
