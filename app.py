@@ -522,7 +522,7 @@ def send_message():
     return flask.jsonify(**context)
 
 @app.route('/api/v1/search/upd')
-def get_search_friends(user):
+def get_search_friends():
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
