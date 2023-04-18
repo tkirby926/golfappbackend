@@ -1,4 +1,5 @@
 
+from crypt import methods
 import flask
 from jinja2 import Undefined
 import mysql.connector
@@ -159,8 +160,6 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "ALTER TABLE messages add isread char(1);")
-    cursor = run_query_basic(connection, "UPDATE messages set isread = '1';")
 
 
 def job2():
@@ -1640,12 +1639,14 @@ def getThreeWeeks():
         day = (day + 21) % 31
     return str(year) + '-' + str(month) + '-' + str(day)
 
-@app.route('/api/v1/messages/<string:user2>/<string:page>/<string:offset>')
+@app.route('/api/v1/messages/<string:user2>/<string:page>/<string:offset>', methods=["GET", "PUT"])
 def get_messages(user2, page, offset):
     off = 20*int(page) + int(offset)
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user1 = user_helper(connection, user)
+    if page == '0':
+        cursor = run_query(connection, "UPDATE messages set isread='1' WHERE userid1 = %s AND userid2 = %s", (user2, user1))
     print(user1)
     print('ahh')
     if user1 == False:
