@@ -450,12 +450,12 @@ def get_times(zip, length):
 
 def send_simple_message(link, email):
 	return requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
-		auth=("api", "181449aa-aac0ab8b"),
+		auth=("api", MAIL_API_KEY),
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
 			"to": "GolfTribe User <" + email + ">",
 			"subject": "Password Reset Request",
-			"template": "password_reset_request",
-            "X-Mailgun-Variables": {"password reset link": link}})
+			"template": "password_reset_request"
+           })
 
 @app.route('/api/v1/reset_password/<string:email>')
 def send_reset_email(email):
