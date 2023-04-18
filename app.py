@@ -665,12 +665,12 @@ def get_notifications():
         context = {'not_user': True}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT notifications, imageurl, first FROM USERS WHERE username = %s;", (user, ))
+    cursor = run_query(connection, "SELECT COUNT(*) FROM messages WHERE userid2 = %s AND is_read = '0';", (user, ))
     data = cursor.fetchone()
     notifications = data[0]
     imageurl = data[1]
     first = data[2]
     user = True
-    cursor = run_query(connection, "SELECT COUNT(*) FROM messages WHERE userid2 = %s AND is_read = '0';", (user, ))
     unread_mess = cursor.fetchone()[0]
     context = {'notifications': notifications, 'imgurl': imageurl, 'first': first, 'user': user, 'unread_mess': unread_mess}
     return flask.jsonify(**context)
