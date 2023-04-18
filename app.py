@@ -454,7 +454,8 @@ def send_simple_message(link, email):
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
 			"to": "GolfTribe User <" + email + ">",
 			"subject": "Password Reset Request",
-			"template": "password_reset_request"
+			"template": "password_reset_request",
+            "h:X-Mailgun-Variables": {"pass_link": link}
            })
 
 @app.route('/api/v1/reset_password/<string:email>')
