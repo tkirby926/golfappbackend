@@ -587,7 +587,7 @@ def send_message():
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp, read) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, '0');", (req['message'], user, req['user2']))
+    cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp, isread) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, '0');", (req['message'], user, req['user2']))
     cursor = run_query(connection, "UPDATE USERS SET notifications = notifications + 1 WHERE username = %s;", (req['user2'], ))
     message = ""
     context = {'error': message}
@@ -1679,7 +1679,7 @@ def get_message_previews():
     last_messages = []
     last_unread = []
     for i in interim:
-        cursor = run_query(connection, "SELECT userid1, userid2, content, timestamp, read FROM Messages WHERE messageid = %s;", (str(i), ))
+        cursor = run_query(connection, "SELECT userid1, userid2, content, timestamp, isread FROM Messages WHERE messageid = %s;", (str(i), ))
         last_message = cursor.fetchall()
         last_messages.append(last_message)
     last_messages_filtered = []
