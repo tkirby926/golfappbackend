@@ -488,12 +488,15 @@ def check_reset_id(resetid):
 @app.route('/api/v1/set_pass', methods =["PUT"])
 def set_new_pass():
     req = flask.request.json
+    print(req)
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT email FROM passreset WHERE resetid = %s", (req['sessionid'],))
     email = cursor.fetchone()[0]
+    print(email)
     if email is None:
         return flask.jsonify({'expired': True})
     cursor = run_query(connection, "UPDATE USERS set password = %s WHERE email = %s;", (req['new_pass'], email))
+    cursor = run_query(connection, "DELETE FROM passreset WHERE sessionid = %s;", (req['sessionid'], ))
     return flask.jsonify({'success': True})
 
 @app.route('/api/v1/search/<string:search>')
