@@ -1267,10 +1267,7 @@ def create_user():
         "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0, '0');", (username, pass_dict['password_db_string'], 
         req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
         req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
-        cookie = set_verification(username)
-        context = flask.jsonify({'error': '', 'cookie': cookie})
-        context = flask.make_response(context)
-        context.set_cookie('username', cookie, path='/', samesite='None', secure=True)
+        context = flask.jsonify({'error': ''})
     else:
         cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
         zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
