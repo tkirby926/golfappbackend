@@ -587,7 +587,6 @@ def send_message():
         context = {'not_user': True}
         return flask.jsonify(**context)
     cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp, isread) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, '0');", (req['message'], user, req['user2']))
-    cursor = run_query(connection, "UPDATE USERS SET notifications = notifications + 1 WHERE username = %s;", (req['user2'], ))
     message = ""
     context = {'error': message}
     return flask.jsonify(**context)
@@ -671,7 +670,9 @@ def get_notifications():
     imageurl = data[1]
     first = data[2]
     user = True
-    context = {'notifications': notifications, 'imgurl': imageurl, 'first': first, 'user': user}
+    cursor = run_query(connection, "SELECT COUNT(*) FROM messages WHERE userid2 = %s AND is_read = '0';", (user, ))
+    unread_mess = cursor.fetchone()[0]
+    context = {'notifications': notifications, 'imgurl': imageurl, 'first': first, 'user': user, 'unread_mess': unread_mess}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/end_first/')
