@@ -22,6 +22,7 @@ import random, string
 from flask_cors import CORS
 
 BUCKET = 'golftribephotos'
+MAIL_API_KEY = '8556fb8b6ff1ddbd28dd5b52ef62f21e-181449aa-aac0ab8b'
 
 
 def create_tables():
@@ -440,6 +441,16 @@ def get_times(zip, length):
             good_courses.append([i[0], i[1], i[4]])
     context = {"good_courses": good_courses}
     return flask.jsonify(**context)
+
+@app.route('/api/v1/send_test_email')
+def send_simple_message():
+	return requests.post(
+		"https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
+		auth=("api", MAIL_API_KEY),
+		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
+			"to": "Thomas Kirby <tkirby00926@gmail.com>",
+			"subject": "Hello Thomas Kirby",
+			"template": "password_reset_request"})
 
 @app.route('/api/v1/search/<string:search>')
 def get_search_results(search):
