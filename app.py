@@ -485,7 +485,7 @@ def check_reset_id(resetid):
     else:
         return flask.jsonify({'expired': False})
 
-@app.route('/api/v1/set_pass')
+@app.route('/api/v1/set_pass', methods =["PUT"])
 def set_new_pass():
     req = flask.request.json
     connection = create_server_connection()
