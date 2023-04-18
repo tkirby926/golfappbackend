@@ -133,6 +133,7 @@ def create_tables():
         userid1 varchar(20) DEFAULT NULL,
         userid2 varchar(20) DEFAULT NULL,
         timestamp datetime DEFAULT NULL,
+        read char(1) DEFAULT NULL,
         messageid int NOT NULL AUTO_INCREMENT,
         PRIMARY KEY (messageid)
         )""")
@@ -158,6 +159,8 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, "ALTER TABLE messages add read char(1);")
+    cursor = run_query_basic(connection, "UPDATE messages set read = '1';")
 
 
 def job2():
@@ -584,7 +587,7 @@ def send_message():
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp) VALUES (%s, %s, %s, CURRENT_TIMESTAMP);", (req['message'], user, req['user2']))
+    cursor = run_query(connection, "INSERT INTO Messages (content, userid1, userid2, timestamp, read) VALUES (%s, %s, %s, CURRENT_TIMESTAMP, '0');", (req['message'], user, req['user2']))
     cursor = run_query(connection, "UPDATE USERS SET notifications = notifications + 1 WHERE username = %s;", (req['user2'], ))
     message = ""
     context = {'error': message}
@@ -1674,8 +1677,9 @@ def get_message_previews():
     print(interim)
     interim.sort(reverse=True)
     last_messages = []
+    last_unread = []
     for i in interim:
-        cursor = run_query(connection, "SELECT userid1, userid2, content, timestamp FROM Messages WHERE messageid = %s;", (str(i), ))
+        cursor = run_query(connection, "SELECT userid1, userid2, content, timestamp, read FROM Messages WHERE messageid = %s;", (str(i), ))
         last_message = cursor.fetchall()
         last_messages.append(last_message)
     last_messages_filtered = []
@@ -1685,12 +1689,17 @@ def get_message_previews():
             if i[0][1] not in matching_users:
                 last_messages_filtered.append([i[0][3], i[0][2]])
                 matching_users.append(i[0][1])
+                last_unread.append(False)
         else:
             if i[0][0] not in matching_users:
                 last_messages_filtered.append([i[0][3], i[0][2]])
                 matching_users.append(i[0][0])
+                if (i[0][4] == '0'):
+                    last_unread.append(True)
+                else:
+                    last_unread.append(False)
     print(last_messages_filtered)
-    context = {'my_friends': my_friends, 'has_more_friends': has_more_friends, 'last_messages': last_messages_filtered, 'matching_users': matching_users}
+    context = {'my_friends': my_friends, 'has_more_friends': has_more_friends, 'last_messages': last_messages_filtered, 'matching_users': matching_users, 'last_unread': last_unread}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/posts')
