@@ -488,6 +488,17 @@ def check_reset_id(resetid):
 @app.route('/api/v1/set_pass', methods =["PUT"])
 def set_new_pass():
     req = flask.request.json
+    pass_dict = {}
+    pass_dict['password'] = req['new_pass']
+    pass_dict['algorithm'] = 'sha512'
+    pass_dict['salt'] = uuid.uuid4().hex
+    pass_dict['hash_obj'] = hashlib.new(pass_dict['algorithm'])
+    pass_dict['pass_salt'] = pass_dict['salt'] + pass_dict['password']
+    pass_dict['hash_obj'].update(pass_dict['pass_salt'].encode('utf-8'))
+    pass_dict['pass_hash'] = pass_dict['hash_obj'].hexdigest()
+    pass_dict['password_db_string'] = "$".join([pass_dict['algorithm'],
+                                                pass_dict['salt'],
+                                                pass_dict['pass_hash']])
     print(req)
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT email FROM passreset WHERE resetid = %s", (req['sessionid'],))
