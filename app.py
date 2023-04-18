@@ -445,7 +445,7 @@ def get_times(zip, length):
 @app.route('/api/v1/send_test_email')
 def send_simple_message():
 	x = requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
-		auth=("api", MAIL_API_KEY),
+		auth=("api", "181449aa-aac0ab8b"),
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
 			"to": "Thomas Kirby <tkirby00926@gmail.com>",
 			"subject": "Hello Thomas Kirby",
