@@ -133,7 +133,7 @@ def create_tables():
         userid1 varchar(20) DEFAULT NULL,
         userid2 varchar(20) DEFAULT NULL,
         timestamp datetime DEFAULT NULL,
-        read char(1) DEFAULT NULL,
+        isread char(1) DEFAULT NULL,
         messageid int NOT NULL AUTO_INCREMENT,
         PRIMARY KEY (messageid)
         )""")
@@ -159,8 +159,8 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "ALTER TABLE messages add read char(1);")
-    cursor = run_query_basic(connection, "UPDATE messages set read = '1';")
+    cursor = run_query_basic(connection, "ALTER TABLE messages add isread char(1);")
+    cursor = run_query_basic(connection, "UPDATE messages set isread = '1';")
 
 
 def job2():
