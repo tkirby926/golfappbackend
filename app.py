@@ -475,7 +475,7 @@ def send_reset_email(email):
     x = send_simple_message(link, email)
     return flask.jsonify({'email_sent': True})
             
-@app.route('/api/v1/check_reset_id/<string:resetid>/')
+@app.route('/api/v1/check_reset_id/<string:resetid>')
 def check_reset_id(resetid):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT email FROM passreset WHERE resetid = %s", (resetid,))
