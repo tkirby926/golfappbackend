@@ -475,8 +475,26 @@ def send_reset_email(email):
     x = send_simple_message(link, email)
     return flask.jsonify({'email_sent': True})
             
-    
+@app.route('/api/v1/check_reset_id/<string:resetid>/')
+def check_reset_id(resetid):
+    connection = create_server_connection()
+    cursor = run_query(connection, "SELECT email FROM passreset WHERE resetid = %s", (resetid,))
+    email = cursor.fetchone()[0]
+    if email is None:
+        return flask.jsonify({'expired': True})
+    else:
+        return flask.jsonify({'expired': False})
 
+@app.route('/api/v1/set_pass')
+def set_new_pass():
+    req = flask.request.json
+    connection = create_server_connection()
+    cursor = run_query(connection, "SELECT email FROM passreset WHERE resetid = %s", (req['sessionid'],))
+    email = cursor.fetchone()[0]
+    if email is None:
+        return flask.jsonify({'expired': True})
+    cursor = run_query(connection, "UPDATE USERS set password = %s WHERE email = %s;", (req['new_pass'], email))
+    return flask.jsonify({'success': True})
 
 @app.route('/api/v1/search/<string:search>')
 def get_search_results(search):
