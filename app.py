@@ -1204,7 +1204,7 @@ def validate_user(username, password):
     print(correct_login)
     context = flask.jsonify({'is_user': is_user, 'correct_login': correct_login, 'too_many_attmpts': False})
     context = flask.make_response(context)
-    context.set_cookie('username', cookie, path='/', samesite='None', secure=True)
+    context.set_cookie('username', cookie, path='/', samesite='None', secure=True, domain='.golftribesocial.com')
     print(context)
     return context
 
