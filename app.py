@@ -42,7 +42,7 @@ def create_tables():
         username varchar(20) NOT NULL,
         firstname varchar(30) DEFAULT NULL,
         lastname varchar(30) DEFAULT NULL,
-        email varchar(40) DEFAULT NULL,
+        email varchar(320) DEFAULT NULL,
         password varchar(180) DEFAULT NULL,
         created datetime DEFAULT CURRENT_TIMESTAMP,
         drinking varchar(40) DEFAULT NULL,
@@ -66,6 +66,11 @@ def create_tables():
 
     cursor = run_query_basic(connection, """CREATE TABLE admins (
         username varchar(20) DEFAULT NULL
+        )""")
+    cursor = run_query_basic(connection, """CREATE TABLE passreset (
+        email varchar(320) DEFAULT NULL,
+        resetid varchar(16) DEFAULT NULL,
+        timestamp datetime DEFAULT NULL
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE bookedtimes (
         username varchar(20) DEFAULT NULL,
@@ -443,18 +448,31 @@ def get_times(zip, length):
     return flask.jsonify(**context)
 
 
-def send_simple_message():
+def send_simple_message(link, email):
 	return requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
 		auth=("api", "181449aa-aac0ab8b"),
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
-			"to": "Thomas Kirby <tkirby00926@gmail.com>",
-			"subject": "Hello Thomas Kirby",
-			"template": "password_reset_request"})
+			"to": "GolfTribe User <" + email + ">",
+			"subject": "Password Reset Request",
+			"template": "password_reset_request",
+            "X-Mailgun-Variables": {"password reset link": link}})
 
-@app.route('/api/v1/send_test_email')
-def send_email():
-    x = send_simple_message()
-    return flask.jsonify({'yes': 'yes'})
+@app.route('/api/v1/reset_password/<string:email>')
+def send_reset_email(email):
+    connection = create_server_connection()
+    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s", (email,))
+    if cursor.fetchone()[0] == 0:
+        return flask.jsonify({'not_user': True})
+    reset = None
+    collision = 1
+    while collision == 1:
+        reset =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(16))
+        cursor = run_query(connection, "SELECT COUNT(*) FROM passreset WHERE resetid = %s", (reset,))
+        collision = cursor.fetchone()[0]
+    cursor = run_query(connection, "INSERT INTO passreset (email, resetid, timestamp) VALUES (%s, %s, CURRENT_TIMESTAMP);", (email, reset))
+    link = 'https://golftribe-frontend.herokuapp.com/pass_reset/' + reset
+    x = send_simple_message(link, email)
+    return flask.jsonify({'email_sent': True})
             
     
 
