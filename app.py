@@ -1269,6 +1269,8 @@ def create_user():
         req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
         cookie = set_verification(username)
         context = flask.jsonify({'error': '', 'cookie': cookie})
+        context = flask.make_response(context)
+        context.set_cookie('username', cookie, path='/', samesite='None', secure=True)
     else:
         cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
         zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
