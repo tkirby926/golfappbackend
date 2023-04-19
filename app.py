@@ -1458,13 +1458,6 @@ def edit_user():
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
-    print(req['username'])
-    if len(req['username']) < 6 or len(req['username']) > 15:
-        context = {'error': 'Username must be between 6 and 15 characters'}
-        return flask.jsonify(**context)
-    if any(not c.isalnum() for c in req['username']):
-        context = {'error': 'Username cannot have special characters (letters and numbers only)'}
-        return flask.jsonify(**context)
     if not req['firstname'].isalpha():
         context = {'error': 'First name can only contain letters'}
         return flask.jsonify(**context)
@@ -1487,9 +1480,9 @@ def edit_user():
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
         print(image_url)
-    cursor = run_query(connection, "UPDATE USERS SET username = %s, firstname = %s, " + 
+    cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
     "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
-    "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['username'], req['firstname'], req['lastname'],
+    "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['firstname'], req['lastname'],
     req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
     req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
     user = cursor.fetchone()
