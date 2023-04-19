@@ -1449,7 +1449,7 @@ def get_single_user():
     cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (username, ))
     return flask.jsonify({'user': cursor.fetchone()})
 
-@app.route('/api/v1/edit', methods=["PUT"])
+@app.route('/api/v1/edit', methods=["POST"])
 def edit_user():
     req = flask.request.form
     connection = create_server_connection()
