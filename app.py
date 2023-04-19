@@ -1693,6 +1693,12 @@ def get_messages(user2, page, offset):
     if user1 == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
+    cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS F WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = %s AND userid1 = %s);", (user2, user1, user2, user1))
+    if (cursor.fetchone()[0] == 0):
+        context = {'not_friends': True}
+        return flask.jsonify(**context)
+    cursor = run_query(connection, "SELECT firstname, lastname, imageurl FROM USERS U WHERE username = %s;", (user2, ))
+    user_data = cursor.fetchone()
     cursor = run_query(connection, "SELECT * FROM Messages WHERE (userid1 = %s AND userid2 = " + 
                        "%s) OR (userid2 = %s AND userid1 = %s) ORDER BY timestamp ASC LIMIT 21 OFFSET %s;", (user1, user2, user1, user2, off))
     messages = cursor.fetchall()
@@ -1700,7 +1706,7 @@ def get_messages(user2, page, offset):
     if len(messages) < 21:
         last = True
     messages = messages[0:20]
-    context = {'messages': messages, 'last': last, 'logged_user': user1}
+    context = {'messages': messages, 'last': last, 'logged_user': user1, 'user_data': user_data}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/message_previews')
