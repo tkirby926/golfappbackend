@@ -469,7 +469,7 @@ def send_verif_email_helper(email, emailcode):
 		auth=("api", MAIL_API_KEY),
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
 			"to": "GolfTribe User <" + email + ">",
-			"subject": "Password Reset Request",
+			"subject": "Email Verification",
 			"template": "verif_email",
             "v:email_link": emailcode
            })
@@ -1318,6 +1318,8 @@ def create_user():
         req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
         context = flask.jsonify({'error': ''})
         emailcode = set_verification(username)
+        print(req['email'])
+        print('douche')
         send_verif_email_helper(req['email'], 'https://www.golfsocial.com/verif_email/' + emailcode)
     else:
         cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
