@@ -1453,6 +1453,7 @@ def get_single_user():
 def edit_user():
     req = flask.request.form
     connection = create_server_connection()
+    print('yayayayayayayayayay')
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
