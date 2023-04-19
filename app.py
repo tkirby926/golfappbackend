@@ -470,7 +470,7 @@ def send_verif_email(email, emailcode):
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
 			"to": "GolfTribe User <" + email + ">",
 			"subject": "Password Reset Request",
-			"template": "password_reset_request",
+			"template": "verif_email",
             "v:email_link": emailcode
            })
 
