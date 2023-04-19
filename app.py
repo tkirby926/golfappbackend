@@ -659,14 +659,24 @@ def get_only_friends(search, page):
     context = {"results": results} 
     return flask.jsonify(**context)
 
+def send_invite_email(email, link):
+    return requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
+		auth=("api", MAIL_API_KEY),
+		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
+			"to": "GolfTribe User <" + email + ">",
+			"subject": "Password Reset Request",
+			"template": "password_reset_request",
+            "v:inv_link": link
+           })
+
 @app.route('/api/v1/send_invite')
 def send_invites():
     req = flask.request.json
     connection = create_server_connection()
-    for i in req:
-        print('hello')
-        #send automated email to friends in request list
-        # cursor = run_query(connection, "SELECT username, firstname, lastname FROM USERS U, Friendships F WHERE ((F.userid1 = U.username AND F.userid2 = '" + user + "') OR (F.userid1 = '" + user + "' AND F.userid2 = U.username)) AND (U.username LIKE '" + search + "%' OR U.firstname LIKE '"
+    for i in req['user_invites']:
+        cursor = cursor = run_query(connection, "SELECT email FROM USERS WHERE username = %s;", (i,))
+        email = cursor.fetchone()[0]
+        send_invite_email(email, 'https://www.golftribesocial.com/tee_time/' + req['timeid'])
     context = {'error': 'none'}
     return flask.jsonify(**context)
     
