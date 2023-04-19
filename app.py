@@ -1084,7 +1084,7 @@ def get_course_info(uniqid):
 @app.route('/api/v1/courses/<string:courseid>/<string:date>')
 def get_courses_times(courseid, date):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT * FROM COURSES WHERE uniqid = %s;", (courseid, ))
+    cursor = run_query(connection, "SELECT coursename, imageurl, street, town, state, zip FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT * FROM TEETIMES WHERE spots > 0 AND uniqid = %s" + 
     " AND CAST(teetime AS DATE) = %s;", (courseid, date))
