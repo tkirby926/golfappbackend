@@ -492,7 +492,7 @@ def send_reset_email(email):
     return flask.jsonify({'email_sent': True})
 
 @app.route('/api/v1/confirm_email/<string:email>')
-def send_reset_email(email):
+def send_verif_email(email):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s", (email,))
     if cursor.fetchone()[0] == 0:
