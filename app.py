@@ -884,7 +884,7 @@ def get_all_posts(page):
     posts = cursor.fetchall()
     img_urls = []
     for i in posts:
-        cursor = run_query(connection, "SELECT imageurl FROM USERS where U.username = %s;", (i[1],))
+        cursor = run_query(connection, "SELECT imageurl FROM USERS where username = %s;", (i[1],))
         img_urls.append(cursor.fetchone()[0])
     print('hello')
     more = False
