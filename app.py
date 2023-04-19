@@ -1488,9 +1488,9 @@ def edit_user():
         image_url = image_url.replace('\\', '')
         print(image_url)
     cursor = run_query(connection, "UPDATE USERS SET username = %s, firstname = %s, " + 
-    "lastname = %s, email = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
+    "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
     "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['username'], req['firstname'], req['lastname'],
-    req['email'],  req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
+    req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
     req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
