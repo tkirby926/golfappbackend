@@ -118,6 +118,10 @@ def create_tables():
         username varchar(20) DEFAULT NULL,
         emailcode varchar(16) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, """CREATE TABLE emailconf (
+        username varchar(20) DEFAULT NULL,
+        emailcode varchar(16) DEFAULT NULL
+        )""")
     cursor = run_query_basic(connection, """CREATE TABLE friendships (
         UserId1 varchar(20) DEFAULT NULL,
         UserId2 varchar(20) DEFAULT NULL
@@ -450,7 +454,7 @@ def get_times(zip, length):
     return flask.jsonify(**context)
 
 
-def send_simple_message(link, email):
+def send_reset_message(link, email):
 	return requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
 		auth=("api", MAIL_API_KEY),
 		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
@@ -458,6 +462,16 @@ def send_simple_message(link, email):
 			"subject": "Password Reset Request",
 			"template": "password_reset_request",
             "v:pass_link": link
+           })
+
+def send_verif_email(email, emailcode):
+	return requests.post("https://api.mailgun.net/v3/sandbox8567b28c25844f7dac562958309522a8.mailgun.org/messages",
+		auth=("api", MAIL_API_KEY),
+		data={"from": "Mailgun Sandbox <postmaster@sandbox8567b28c25844f7dac562958309522a8.mailgun.org>",
+			"to": "GolfTribe User <" + email + ">",
+			"subject": "Password Reset Request",
+			"template": "password_reset_request",
+            "v:email_link": emailcode
            })
 
 @app.route('/api/v1/reset_password/<string:email>')
@@ -473,8 +487,25 @@ def send_reset_email(email):
         cursor = run_query(connection, "SELECT COUNT(*) FROM passreset WHERE resetid = %s", (reset,))
         collision = cursor.fetchone()[0]
     cursor = run_query(connection, "INSERT INTO passreset (email, resetid, timestamp) VALUES (%s, %s, CURRENT_TIMESTAMP);", (email, reset))
+    link = 'https://www.golftribesocial.com/pass_reset/' + reset
+    x = send_reset_message(link, email)
+    return flask.jsonify({'email_sent': True})
+
+@app.route('/api/v1/confirm_email/<string:email>')
+def send_reset_email(email):
+    connection = create_server_connection()
+    cursor = run_query(connection, "SELECT COUNT(*) FROM USERS WHERE email = %s", (email,))
+    if cursor.fetchone()[0] == 0:
+        return flask.jsonify({'not_user': True})
+    reset = None
+    collision = 1
+    while collision == 1:
+        reset =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(16))
+        cursor = run_query(connection, "SELECT COUNT(*) FROM passreset WHERE resetid = %s", (reset,))
+        collision = cursor.fetchone()[0]
+    cursor = run_query(connection, "INSERT INTO passreset (email, resetid, timestamp) VALUES (%s, %s, CURRENT_TIMESTAMP);", (email, reset))
     link = 'https://golftribe-frontend.herokuapp.com/pass_reset/' + reset
-    x = send_simple_message(link, email)
+    x = send_reset_message(link, email)
     return flask.jsonify({'email_sent': True})
             
 @app.route('/api/v1/check_reset_id/<string:resetid>')
@@ -1286,6 +1317,8 @@ def create_user():
         req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
         req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url))
         context = flask.jsonify({'error': ''})
+        emailcode = set_verification(username)
+        send_verif_email(req['email'], 'https://www.golfsocial.com/verif_email/' + emailcode)
     else:
         cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
         zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
