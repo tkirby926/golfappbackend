@@ -80,6 +80,8 @@ def create_tables():
         KEY timeid (timeid),
         CONSTRAINT bookedtimes_ibfk_1 FOREIGN KEY (username) REFERENCES USERS (username)
         )""")
+    
+    cursor = run_query_basic(connection, "INSERT INTO BOOKEDTIMES (username, timeid) VALUES ('tkirby', '24');")
     cursor = run_query_basic(connection, """CREATE TABLE cookies (
         username varchar(20) DEFAULT NULL,
         sessionid varchar(32) DEFAULT NULL,
