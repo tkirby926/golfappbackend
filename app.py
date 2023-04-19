@@ -164,6 +164,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, "DELETE FROM USERS WHERE email = 'golffriendsapp@gmail.com';")
 
 
 def job2():
