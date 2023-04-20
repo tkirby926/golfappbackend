@@ -1453,7 +1453,6 @@ def get_single_user():
 def edit_user():
     req = flask.request.form
     connection = create_server_connection()
-    print('yayayayayayayayayay')
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     if user == False:
@@ -1481,11 +1480,13 @@ def edit_user():
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
         print(image_url)
+    print('yayayayayayaya')
     cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
     "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
     "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['firstname'], req['lastname'],
     req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
     req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
+    print('jokin')
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
     context = flask.make_response(context)
