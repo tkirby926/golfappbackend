@@ -65,6 +65,12 @@ def create_tables():
         PRIMARY KEY (username)
         )""")
 
+    cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
+        username varchar(20) DEFAULT NULL,
+        timeid varchar(20) DEFAULT NULL,
+        num_users varchar(2) DEFAULT NULL
+        )""")
+
     cursor = run_query_basic(connection, """CREATE TABLE admins (
         username varchar(20) DEFAULT NULL
         )""")
@@ -1423,12 +1429,8 @@ stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJ
 def create_payment():
     data = flask.json.loads(flask.request.data)
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT C.coursename, C.street, C.state, C.zip, T.teetime FROM COURSES C, TEETIMES T WHERE T.timeid = %s" +
-                       " AND T.uniqid = C.uniqid;", (data['timeid'], ))
-    # Create a PaymentIntent with the order amount and currency
-    course_info = cursor.fetchone()
     cost = calculate_order_amount(data['timeid'])
-    print(round((cost + (cost*.0816)), 2))
+    print(round((data['num_users'] * (cost + (cost*.0816))), 2))
     intent = stripe.PaymentIntent.create(
         amount= int(round((cost + (cost*.0816)), 2) * 100),
         currency='usd',
@@ -1436,8 +1438,7 @@ def create_payment():
     )
     return flask.jsonify({
         'clientSecret': intent['client_secret'],
-        'cost': cost,
-        'course_info': course_info
+        'cost': cost
     })
 
 @app.route('/api/v1/users')
@@ -1874,17 +1875,18 @@ def get_time_info(timeid):
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl FROM Courses C, Teetimes T WHERE T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
     time_info = list(cursor.fetchone())
+    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
+    time_users = cursor.fetchall()
+    time_info.append(time_users)
     if user == False:
         context = {'not_user': True, 'in_time': False, 'time_info': time_info}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
     print(time_info)
-    time_users = cursor.fetchall()
     in_time = False
     for i in time_users:
         if i[0] == user:
             in_time = True
-    time_info.append(time_users)
+    
     context = {"time_info": time_info, 'in_time': in_time}
     return flask.jsonify(**context)
 
