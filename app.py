@@ -1481,12 +1481,18 @@ def edit_user():
         image_url = res['data']['url']
         image_url = image_url.replace('\\', '')
         print(image_url)
-    print('yayayayayayaya')
-    cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
-    "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
-    "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['firstname'], req['lastname'],
-    req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
-    req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
+    if image_url != '':
+        cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
+        "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
+        "college = %s, wager = %s, cart = %s, imageurl = %s WHERE username = %s;", (req['firstname'], req['lastname'],
+        req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
+        req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
+    else:
+        cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
+        "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
+        "college = %s, wager = %s, cart = %s WHERE username = %s;", (req['firstname'], req['lastname'],
+        req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
+        req['descript'], req['college'], req['wager'], req['cart'], user)) 
     print('jokin')
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
