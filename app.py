@@ -1464,6 +1464,7 @@ def edit_user():
     if not req['lastname'].isalpha():
         context = {'error': 'Last name can only contain letters'}
         return flask.jsonify(**context)
+    image_url = ''
     if (req['hasphoto'] == '1'):
         r = Image.open(flask.request.files['file'])
         r_usuable = r.convert('RGB')
