@@ -1488,6 +1488,8 @@ def edit_user():
     req['descript'], req['college'], req['wager'], req['cart'], image_url, user)) 
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
+    context = flask.make_response(context)
+    context.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
     return flask.jsonify(**context)
 
 @app.route('/api/v1/course_schedule/<string:day>')
