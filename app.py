@@ -831,7 +831,7 @@ def get_user_profile(user2):
     user1 = flask.request.cookies.get('username')
     print(user1)
     user1 = user_helper(connection, user1)
-    is_logged_user = False
+    is_logged_user = user1
     if user1 == user2:
         is_logged_user = True
     cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS WHERE username = %s;", (user2, ))
