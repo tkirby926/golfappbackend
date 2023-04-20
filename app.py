@@ -551,6 +551,8 @@ def get_search_results(search):
     user = user_helper(connection, user)
     print(user)
     search = search + '%'
+    if (user == False):
+        user = ''
     cursor = run_query(connection, "SELECT username, firstname, lastname, imageurl FROM USERS WHERE username != %s AND (username LIKE %s OR firstname LIKE %s OR lastname LIKE %s OR CONCAT(firstname, ' ', lastname) LIKE %s) LIMIT 6;", (user, search, search, search, search))
     results = cursor.fetchall()
     files = []
