@@ -1105,7 +1105,7 @@ def get_courses_times(courseid, date):
     cursor = run_query(connection, "SELECT coursename, imageurl, street, town, state, zip FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT * FROM TEETIMES WHERE spots > 0 AND uniqid = %s" + 
-    " AND CAST(teetime AS DATE) = %s;", (courseid, date))
+    " AND CAST(teetime AS DATE) = %s ORDER BY teetime;", (courseid, date))
     course_times = cursor.fetchall()
     context = {'course_info': course_info, 'course_times': course_times}
     return flask.jsonify(**context)
