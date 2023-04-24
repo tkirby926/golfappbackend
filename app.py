@@ -63,6 +63,7 @@ def create_tables():
         imageurl varchar(60) DEFAULT NULL,
         active char(1) DEFAULT NULL,
         first char(1) DEFAULT NULL,
+        age varchar(5) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
 
@@ -171,7 +172,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, """UPDATE teetimes set holes = 18;""")
+    cursor = run_query_basic(connection, """ALTER TABLE USERS add age varchar(5);""")
 
 
 def job2():
