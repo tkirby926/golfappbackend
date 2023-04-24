@@ -171,7 +171,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "ALTER TABLE TEETIMES ADD holes int;")
+    cursor = run_query_basic(connection, """UPDATE teetimes set holes = 18;""")
 
 
 def job2():
