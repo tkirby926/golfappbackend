@@ -47,25 +47,31 @@ def create_tables():
         email varchar(320) DEFAULT NULL,
         password varchar(180) DEFAULT NULL,
         created datetime DEFAULT CURRENT_TIMESTAMP,
-        drinking varchar(40) DEFAULT NULL,
-        score varchar(40) DEFAULT NULL,
-        playstyle varchar(40) DEFAULT NULL,
+        drinking decimal(2, 1) DEFAULT NULL,
+        score decimal(2, 1) DEFAULT NULL,
+        playstyle decimal(2, 1) DEFAULT NULL,
         descript text,
         college varchar(40) DEFAULT NULL,
         favteam varchar(50) DEFAULT NULL,
         favgolf varchar(50) DEFAULT NULL,
         favcourse varchar(50) DEFAULT NULL,
-        wager varchar(5) DEFAULT NULL,
-        music varchar(5) DEFAULT NULL,
-        cart varchar(5) DEFAULT NULL,
+        wager decimal(2, 1) DEFAULT NULL,
+        music decimal(2, 1) DEFAULT NULL,
+        cart decimal(2, 1) DEFAULT NULL,
         notifications int DEFAULT NULL,
         loginattmpts int DEFAULT NULL,
         imageurl varchar(60) DEFAULT NULL,
         active char(1) DEFAULT NULL,
         first char(1) DEFAULT NULL,
-        age varchar(5) DEFAULT NULL,
+        age decimal(2, 1) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN drinking decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN score decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN playstyle decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN wager decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN music decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN cart decimal(2, 1);""")
 
     cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
         username varchar(20) DEFAULT NULL,
@@ -172,6 +178,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN age decimal(2, 1);""")
 
 
 def job2():
