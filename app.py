@@ -1872,7 +1872,7 @@ def get_time_info(timeid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl FROM Courses C, Teetimes T WHERE T.timeid = " +
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl, T.holes FROM Courses C, Teetimes T WHERE T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
     time_info = list(cursor.fetchone())
     cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
