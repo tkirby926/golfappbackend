@@ -64,21 +64,11 @@ def create_tables():
         active char(1) DEFAULT NULL,
         first char(1) DEFAULT NULL,
         age decimal(2, 1) DEFAULT NULL,
+        lat decimal(5, 2) DEFAULT NULL,
+        lon decimal(5, 2) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET drinking = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET score = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET playstyle = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET wager = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET music = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET cart = 0;""")
-    cursor = run_query_basic(connection, """ UPDATE USERS SET age = 0;""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify drinking decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify score decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify playstyle decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify wager decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify music decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify cart decimal(2, 1);""")
+
 
     cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
         username varchar(20) DEFAULT NULL,
@@ -185,7 +175,8 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS modify age decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS add lat decimal(5, 2);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS add lon decimal(5, 2);""")
 
 
 def job2():
