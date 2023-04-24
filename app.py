@@ -66,12 +66,19 @@ def create_tables():
         age decimal(2, 1) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN drinking decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN score decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN playstyle decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN wager decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN music decimal(2, 1);""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN cart decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET drinking = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET score = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET playstyle = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET wager = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET music = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET cart = 0;""")
+    cursor = run_query_basic(connection, """ UPDATE USERS SET age = 0;""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify drinking decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify score decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify playstyle decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify wager decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify music decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS Modify cart decimal(2, 1);""")
 
     cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
         username varchar(20) DEFAULT NULL,
@@ -178,7 +185,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS ALTER COLUMN age decimal(2, 1);""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS modify age decimal(2, 1);""")
 
 
 def job2():
