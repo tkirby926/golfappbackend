@@ -175,6 +175,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, """ ALTER TABLE USERS add zip VARCHAR(5);""")
 
 
 def job2():
