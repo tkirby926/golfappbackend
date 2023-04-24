@@ -36,6 +36,7 @@ def create_tables():
         cost varchar(20) DEFAULT NULL,
         spots int DEFAULT NULL,
         cart bit(1) DEFAULT NULL,
+        holes int DEFAULT NULL,
         PRIMARY KEY (timeid),
         KEY uniqid (uniqid)
         )""")
@@ -170,7 +171,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "DELETE FROM USERS WHERE email = 'golffriendsapp@gmail.com';")
+    cursor = run_query_basic(connection, "ALTER TABLE TEETIMES ADD holes int;")
 
 
 def job2():
