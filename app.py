@@ -66,6 +66,7 @@ def create_tables():
         age decimal(2, 1) DEFAULT NULL,
         lat decimal(5, 2) DEFAULT NULL,
         lon decimal(5, 2) DEFAULT NULL,
+        zip VARCHAR(5) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
 
@@ -175,7 +176,6 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, """ ALTER TABLE USERS add zip VARCHAR(5);""")
 
 
 def job2():
@@ -1336,10 +1336,10 @@ def create_user():
         image_url = image_url.replace('\\', '')
     if req['user'] == '0':
         cursor = run_query(connection, """INSERT INTO USERS (username, password, firstname, lastname, 
-        email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts, first, age, lat, lon) VALUES (%s, """ +
-        "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0, '0', %s, %s, %s);", (username, pass_dict['password_db_string'], 
+        email, score, favcourse, drinking, music, favgolf, favteam, playstyle, wager, cart, descript, imageurl, active, loginattmpts, first, age, lat, lon, zip) VALUES (%s, """ +
+        "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '0', 0, '0', %s, %s, %s, %s);", (username, pass_dict['password_db_string'], 
         req['firstname'], req['lastname'], req['email'], req['score'], req['favcourse'], req['drinking'], req['music'], 
-        req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url, req['age'], lat, lon))
+        req['favgolf'], req['favteam'], req['playstyle'], req['wager'], req['cart'], req['descript'], image_url, req['age'], lat, lon, req['zip']))
         context = flask.jsonify({'error': ''})
         emailcode = set_verification(username)
         print(req['email'])
@@ -1492,15 +1492,15 @@ def edit_user():
     if image_url != '':
         cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
         "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
-        "college = %s, wager = %s, cart = %s, imageurl = %s, age = %s, lat = %s, lon = %s WHERE username = %s;", (req['firstname'], req['lastname'],
+        "college = %s, wager = %s, cart = %s, imageurl = %s, age = %s, lat = %s, lon = %s, zip = %s WHERE username = %s;", (req['firstname'], req['lastname'],
         req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
-        req['descript'], req['college'], req['wager'], req['cart'], image_url, req['age'], lat, lon, user)) 
+        req['descript'], req['college'], req['wager'], req['cart'], image_url, req['age'], lat, lon, req['zip'], user)) 
     else:
         cursor = run_query(connection, "UPDATE USERS SET firstname = %s, " + 
         "lastname = %s, score = %s, drinking = %s, music = %s, favgolf = %s, favteam = %s, playstyle = %s, descript = %s, " + 
-        "college = %s, wager = %s, cart = %s, age = %s, lat = %s, lon = %s WHERE username = %s;", (req['firstname'], req['lastname'],
+        "college = %s, wager = %s, cart = %s, age = %s, lat = %s, lon = %s, zip = %s WHERE username = %s;", (req['firstname'], req['lastname'],
         req['score'], req['drinking'], req['music'], req['favgolf'], req['favteam'], req['playstyle'], 
-        req['descript'], req['college'], req['wager'], req['cart'], req['age'], lat, lon, user)) 
+        req['descript'], req['college'], req['wager'], req['cart'], req['age'], lat, lon, req['zip'], user)) 
     print('jokin')
     user = cursor.fetchone()
     context = {'error': '', 'user': user}
