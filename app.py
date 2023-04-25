@@ -960,7 +960,7 @@ def get_all_posts(page):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/single_post/<int:pid>')
-def get_all_posts(pid):
+def get_single_post(pid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
