@@ -1469,8 +1469,8 @@ def get_suggested_friends():
     user_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT username, firstname, lastname, score, favcourse, drinking," + 
     " music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U WHERE U.username NOT IN (" +
-    "SELECT U.username FROM USERS U, FRIENDSHIPS F WHERE (F.userid1 = %s AND F.userid2 = U.username) OR (F.userid1 = U.username AND F.userid2 = %s))" + 
-    " ORDER BY ABS(drinking - %s) + ABS(score - %s) + ABS(wager - %s) + ABS(cart - %s) + ABS(age - %s) + ABS(music - %s) LIMIT 3;", (username, username, user_info[0], user_info[1], 
+    "SELECT U.username FROM USERS U, FRIENDSHIPS F WHERE U.Username != %s AND (F.userid1 = %s AND F.userid2 = U.username) OR (F.userid1 = U.username AND F.userid2 = %s))" + 
+    " ORDER BY ABS(drinking - %s) + ABS(score - %s) + ABS(wager - %s) + ABS(cart - %s) + ABS(age - %s) + ABS(music - %s) LIMIT 3;", (username, username, username, user_info[0], user_info[1], 
     user_info[2], user_info[3], user_info[4], user_info[5]))
     suggested_friends = cursor.fetchall()
     return flask.jsonify({'suggested_friends': suggested_friends})
