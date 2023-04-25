@@ -165,7 +165,7 @@ def create_tables():
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE postcomments (
         content varchar(700) DEFAULT NULL,
-        username varchar(20) DEFAULT NULL,
+        username varchar(20) NOT NULL,
         timestamp datetime DEFAULT NULL,
         postid int NOT NULL,
         commentid int NOT NULL AUTO_INCREMENT,
@@ -957,6 +957,22 @@ def get_all_posts(page):
     if (len(posts) == 6):
         more = True
     context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls}
+    return flask.jsonify(**context)
+
+@app.route('/api/v1/single_post/<int:pid>')
+def get_all_posts(pid):
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
+    print(user)
+    if user == False:
+        context = {'not_user': True}
+        return flask.jsonify(**context)
+    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, U.firstname, U.lastname FROM Posts P, USERS U WHERE P.username = U.username AND P.postid = %s", (pid, ))
+    posts_info = cursor.fetchone()
+    cursor = run_query(connection, "SELECT P.content, P.username, U.imageurl, U.firstname, U.lastname, P.timestamp FROM PostComments P, USERS U WHERE P.username = U.username AND P.postid = %s ORDER BY P.timestamp DESC;", (pid, ))
+    comments = cursor.fetchall()
+    context = {'post': posts_info, 'comments': comments}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/email/<string:email>')
