@@ -1469,7 +1469,8 @@ def get_suggested_friends(page):
     user_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle," + 
     " descript, wager, cart, imageurl, age FROM USERS U WHERE U.username != %s AND U.username NOT IN (" +
-    "SELECT U.username FROM USERS U, FRIENDSHIPS F WHERE (F.userid1 = %s AND F.userid2 = U.username) OR (F.userid1 = U.username AND F.userid2 = %s))" + 
+    "SELECT U.username FROM USERS U, FRIENDSHIPS F, REQUESTEDFRIENDS R WHERE (F.userid1 = %s AND F.userid2 = U.username) OR (F.userid1 = U.username AND F.userid2 = %s) OR " + 
+    "(R.username1 = %s AND R.username2 = U.username) OR (R.username1 = U.username AND R.username2 = %s))" + 
     " ORDER BY ABS(drinking - %s) + ABS(score - %s) + ABS(wager - %s) + ABS(cart - %s) + ABS(age - %s) + ABS(music - %s) LIMIT 3 OFFSET %s;", (username, username, username, user_info[0], user_info[1], 
     user_info[2], user_info[3], user_info[4], user_info[5], page * 3))
     suggested_friends = cursor.fetchall()
