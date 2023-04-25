@@ -154,7 +154,6 @@ def create_tables():
         messageid int NOT NULL AUTO_INCREMENT,
         PRIMARY KEY (messageid)
         )""")
-    cursor = run_query_basic(connection, """DROP TABLE POSTS;""")
     cursor = run_query_basic(connection, """CREATE TABLE posts (
         content varchar(700) DEFAULT NULL,
         username varchar(20) DEFAULT NULL,
