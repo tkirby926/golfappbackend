@@ -1911,11 +1911,15 @@ def get_my_times():
     my_times = cursor.fetchall()
     cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, P.postid FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
     my_posts = cursor.fetchall()
+    coms = []
+    for i in my_posts:
+        cursor = run_query(connection, "SELECT COUNT(*) FROM PostComments WHERE postid = %s;", (i[5], ))
+        coms.append(cursor.fetchone()[0])
     has_more_posts = False
     if (len(my_posts) == 4):
         has_more_posts: True
     my_friends, has_more_friends = get_my_friends_helper(connection, user, '0', False)
-    context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends}
+    context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends, 'post_coms': coms}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/my_posts/')
