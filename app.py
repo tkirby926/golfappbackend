@@ -1907,7 +1907,7 @@ def get_my_times():
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Courses C, Teetimes T, BookedTimes B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user, ))
     my_times = cursor.fetchall()
-    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
+    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, P.postid FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
     my_posts = cursor.fetchall()
     has_more_posts = False
     if (len(my_posts) == 4):
