@@ -987,7 +987,7 @@ def get_single_post(pid):
     posts_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT P.content, P.username, U.imageurl, U.firstname, U.lastname, P.timestamp FROM PostComments P, USERS U WHERE P.username = U.username AND P.postid = %s ORDER BY P.timestamp DESC;", (pid, ))
     comments = cursor.fetchall()
-    context = {'post': posts_info, 'comments': comments}
+    context = {'post': posts_info, 'comments': comments, 'user': user}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/email/<string:email>')
