@@ -958,18 +958,20 @@ def get_all_posts(page):
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, P.postid, COUNT(C.commentid) FROM Posts P, PostComments C WHERE C.postid = P.postid AND (P.username = %s OR P.username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
-                                    "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user, user, user, page * 5))
+    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, P.postid FROM Posts P WHERE P.username = %s OR P.username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+                                    "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user, user, user, page * 5))
     posts = cursor.fetchall()
     img_urls = []
+    coms = []
     for i in posts:
         cursor = run_query(connection, "SELECT imageurl FROM USERS where username = %s;", (i[1],))
         img_urls.append(cursor.fetchone()[0])
-    print('hello')
+        cursor = run_query(connection, "SELECT COUNT(*) FROM PostComments where postid = %s;", (i[4],))
+        coms.append(cursor.fetchone()[0])
     more = False
     if (len(posts) == 6):
         more = True
-    context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls}
+    context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls, 'comments': coms}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/single_post/<int:pid>')
