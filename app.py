@@ -807,6 +807,20 @@ def post_post():
     context = {'error': 'none', 'curtime': cursor.fetchone()}
     return flask.jsonify(**context)
 
+@app.route('/api/v1/post_comment', methods=["POST"])
+def post_comment():
+    req = flask.request.json
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
+    if user == False:
+        context = {'not_user': True}
+        return flask.jsonify(**context)
+    cursor = run_query(connection, "INSERT INTO PostComments (content, username, timestamp, postid) VALUES (%s, %s, CURRENT_TIMESTAMP, %s);", (req['content'], user, req['postid']))
+    cursor = run_query_basic(connection, "SELECT CURRENT_TIMESTAMP;")
+    context = {'error': 'none', 'curtime': cursor.fetchone()}
+    return flask.jsonify(**context)
+
 def get_friend_requests_helper(connection, user, page):
     cursor = run_query(connection, "UPDATE USERS SET notifications = 0 WHERE username = %s;", (user, ))
     cursor = run_query(connection, "SELECT R.username1, U.firstname, lastname FROM REQUESTEDFRIENDS R, USERS U WHERE R.username2 = %s AND R.username1 = U.username LIMIT 6 OFFSET %s;", (user, int(page)*5))
