@@ -933,6 +933,7 @@ def get_swipe_times(zip, date, offset):
             query = query + "C.uniqid = " + str(item[6]) + " "
     query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.timestamp = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s"
     swipe_course = []
+    good_time_users = []
     if user != False:
         cursor = run_query(connection, "SELECT drinking, score, wager, cart, age, music FROM USERS WHERE username = %s;", (user, ))
         logged_user = cursor.fetchone()
