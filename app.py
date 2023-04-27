@@ -940,7 +940,8 @@ def get_swipe_times(zip, date, offset):
         logged_user = cursor.fetchone()
         print(query)
         cursor = run_query(connection, query, (date, logged_user[0], logged_user[1], logged_user[2], logged_user[3], logged_user[4], logged_user[5], int(offset)))
-        good_time_id = cursor.fetchone()[0]
+        good_time_id = cursor.fetchone()
+        print(good_time_id)
         cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
         good_time_users = cursor.fetchall()
         cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
