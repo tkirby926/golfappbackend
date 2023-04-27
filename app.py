@@ -1,4 +1,5 @@
 
+from cProfile import run
 from crypt import methods
 import flask
 from jinja2 import Undefined
@@ -916,21 +917,33 @@ def course_log_out():
     resp.delete_cookie('course_user', samesite='None', secure=True)
     return resp
 
-@app.route('/api/v1/teetimes/<string:zip>/<string:date>')
-def get_swipe_times(zip, date):
+@app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
+def get_swipe_times(zip, date, offset):
     lat, lon = location_search_helper(zip)
     connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
     cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
-    good_times = []
-    # for i in good_courses:
-        # cursor = run_query(connection, "SELECT t.timeid, t.cost, c.coursename FROM TEETIMES t, COURSES c WHERE c.coursename=" +
-                                        # "%s AND c.uniqid = t.uniqid AND CAST(teetime AS DATE) = %s AND t.timeid IN (SELECT DISTINCT timeid FROM BOOKEDTIMES);", (i[4], date))
-        # good_times = cursor.fetchall()
-        # print(good_times)
-        # random.shuffle(good_times)
-    # print(good_courses)
-    context = {'good_courses': good_courses, 'good_times': good_times}
+    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE"
+    for i, item in enumerate(good_courses):
+        if i == len(good_courses) - 1:
+            query = query + "C.uniqid = " + item[6] + " OR "
+        else:
+            query = query + "C.uniqid = " + item[6] + " "
+    query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.timestamp = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s"
+    if user != False:
+        cursor = run_query(connection, "SELECT drinking, score, wager, cart, age, music FROM USERS WHERE username = %s;", (user, ))
+        logged_user = cursor.fetchone()
+        print(query)
+        cursor = run_query(connection, query, (date, logged_user[0], logged_user[1], logged_user[2], logged_user[3], logged_user[4], logged_user[5], int(offset)))
+        good_time_id = cursor.fetchone()[0]
+        cursor = run_query(connection, "SELECT username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s", (good_time_id,))
+        good_time_users = cursor.fetchall()
+        cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
+        swipe_course = cursor.fetchone()
+    print(good_courses)
+    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
