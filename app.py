@@ -928,9 +928,9 @@ def get_swipe_times(zip, date, offset):
     query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE"
     for i, item in enumerate(good_courses):
         if i == len(good_courses) - 1:
-            query = query + "C.uniqid = " + item[6] + " OR "
+            query = query + "C.uniqid = " + str(item[6]) + " OR "
         else:
-            query = query + "C.uniqid = " + item[6] + " "
+            query = query + "C.uniqid = " + str(item[6]) + " "
     query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.timestamp = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s"
     if user != False:
         cursor = run_query(connection, "SELECT drinking, score, wager, cart, age, music FROM USERS WHERE username = %s;", (user, ))
