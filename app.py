@@ -923,6 +923,7 @@ def get_swipe_times(zip, date, offset):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
+    print(user)
     cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
     query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE"
