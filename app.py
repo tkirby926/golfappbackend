@@ -926,9 +926,9 @@ def get_swipe_times(zip, date, offset):
     print(user)
     cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
-    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE"
+    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE "
     for i, item in enumerate(good_courses):
-        if i == len(good_courses) - 1:
+        if i != len(good_courses) - 1:
             query = query + "C.uniqid = " + str(item[6]) + " OR "
         else:
             query = query + "C.uniqid = " + str(item[6]) + " "
