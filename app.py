@@ -187,7 +187,6 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "INSERT INTO BOOKEDTIMES (username, timeid) VALUES ('yolo123', 24);")
 
 
 def job2():
@@ -919,7 +918,7 @@ def course_log_out():
     return resp
 
 def swipetime_helper(connection, date, offset, user, good_courses, first):
-    query = "SELECT T.timeid, U.drinking, U.score, U.wager, U.cart, U.age, U.music FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE "
+    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE "
     cid_string = ''
     for i, item in enumerate(good_courses):
         if i != len(good_courses) - 1:
