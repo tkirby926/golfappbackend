@@ -187,7 +187,7 @@ def create_tables():
         time time DEFAULT NULL,
         cost varchar(10) DEFAULT NULL
         )""")
-    cursor = run_query_basic(connection, "INSERT INTO BOOKEDTIMES (username, timeid) VALUES ('yolo123', 4);")
+    cursor = run_query_basic(connection, "INSERT INTO BOOKEDTIMES (username, timeid) VALUES ('yolo123', 24);")
 
 
 def job2():
