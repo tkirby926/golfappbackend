@@ -945,7 +945,7 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
         print(query)
         cursor = run_query(connection, query, (date, logged_user[0], logged_user[1], logged_user[2], logged_user[3], logged_user[4], logged_user[5], int(offset)))
         good_time_id = cursor.fetchall()
-        print(good_time_id)
+        print(len(good_time_id))
         if len(good_time_id) > 1:
             more = True
             good_time_id = good_time_id[0]
