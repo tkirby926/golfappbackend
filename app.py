@@ -949,7 +949,7 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
         if len(good_time_id) > 1:
             more = True
             good_time_id = good_time_id[0]
-        if good_time_id is not None:
+        if len(good_time_id) > 0:
             good_time_id = good_time_id[0]
             cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
             good_time_users = cursor.fetchall()
