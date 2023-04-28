@@ -917,21 +917,24 @@ def course_log_out():
     resp.delete_cookie('course_user', samesite='None', secure=True)
     return resp
 
-@app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
-def get_swipe_times(zip, date, offset):
-    lat, lon = location_search_helper(zip)
-    connection = create_server_connection()
-    user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
-    print(user)
-    cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
-    good_courses = cursor.fetchall()
+def swipetime_helper(connection, date, offset, user, good_courses, first):
     query = "SELECT T.timeid, U.drinking, U.score, U.wager, U.cart, U.age, U.music FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE "
+    cid_string = ''
     for i, item in enumerate(good_courses):
         if i != len(good_courses) - 1:
-            query = query + "C.uniqid = " + str(item[6]) + " OR "
+            if (first):
+                query = query + "C.uniqid = " + str(item[6]) + " OR "
+                cid_string += str(item[6]) + '-'
+            else:
+                query = query + "C.uniqid = " + item + " OR "
+                cid_string += item + '-'
         else:
-            query = query + "C.uniqid = " + str(item[6]) + " "
+            if (first):
+                query = query + "C.uniqid = " + str(item[6]) + " "
+                cid_string += str(item[6])
+            else:
+                query = query + "C.uniqid = " + item + " "
+                cid_string += item
     query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.teetime = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s;"
     swipe_course = []
     good_time_users = []
@@ -947,8 +950,32 @@ def get_swipe_times(zip, date, offset):
             good_time_users = cursor.fetchall()
             cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
             swipe_course = cursor.fetchone()
+    if (first):
+        return good_time_users, swipe_course, cid_string
+    return good_time_users, swipe_course
+
+@app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
+def get_swipe_times(zip, date, offset):
+    lat, lon = location_search_helper(zip)
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
+    print(user)
+    cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
+    good_courses = cursor.fetchall()
+    good_time_users, swipe_course, cid_string = swipetime_helper(connection, date, offset, user, good_courses, True)
     print(good_courses)
-    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users}
+    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string}
+    return flask.jsonify(**context)
+
+@app.route('/api/v1/swipetimes/<string:courses>/<string:date>/<string:offset>')
+def get_time_users(courses, date, offset):
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    user = user_helper(connection, user)
+    good_courses = courses.split('-')
+    good_time_users, swipe_course = swipetime_helper(connection, date, offset, user, good_courses, False)
+    context = {'good_time_users': good_time_users, 'swipe_course': swipe_course}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
@@ -1140,14 +1167,6 @@ def transaction_error(timeid):
     connection = create_server_connection()
     cursor = run_query(connection, "UPDATE Teetimes set spots = spots + 1 WHERE timeid = %s;", (timeid, ))
     context = {'error': 'none'}
-    return flask.jsonify(**context)
-
-@app.route('/api/v1/swipetimes/users/<string:timeid>')
-def get_time_users(timeid):
-    connection = create_server_connection()
-    cursor = run_query(connection, "SELECT username, firstname, lastname, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND U.username = B.username;""", (timeid, ))
-    good_users = cursor.fetchall()
-    context = {'good_users': good_users}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/course_info/<string:uniqid>')
