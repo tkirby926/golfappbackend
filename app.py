@@ -935,7 +935,7 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
             else:
                 query = query + "C.uniqid = " + item + " "
                 cid_string += item
-    query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.teetime = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s;"
+    query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND CAST(T.teetime AS DATE) = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s;"
     swipe_course = []
     good_time_users = []
     if user != False:
@@ -944,6 +944,7 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
         print(query)
         cursor = run_query(connection, query, (date, logged_user[0], logged_user[1], logged_user[2], logged_user[3], logged_user[4], logged_user[5], int(offset)))
         good_time_id = cursor.fetchone()
+        
         if good_time_id is not None:
             good_time_id = good_time_id[0]
             cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
