@@ -935,16 +935,18 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
             else:
                 query = query + "C.uniqid = " + item + " "
                 cid_string += item
-    query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND CAST(T.teetime AS DATE) = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 1 OFFSET %s;"
+    query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND CAST(T.teetime AS DATE) = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 2 OFFSET %s;"
     swipe_course = []
     good_time_users = []
+    more = False
     if user != False:
         cursor = run_query(connection, "SELECT drinking, score, wager, cart, age, music FROM USERS WHERE username = %s;", (user, ))
         logged_user = cursor.fetchone()
         print(query)
         cursor = run_query(connection, query, (date, logged_user[0], logged_user[1], logged_user[2], logged_user[3], logged_user[4], logged_user[5], int(offset)))
         good_time_id = cursor.fetchone()
-        
+        if len(good_time_id) > 1:
+            more = True
         if good_time_id is not None:
             good_time_id = good_time_id[0]
             cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
@@ -952,8 +954,8 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
             cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
             swipe_course = cursor.fetchone()
     if (first):
-        return good_time_users, swipe_course, cid_string
-    return good_time_users, swipe_course
+        return good_time_users, swipe_course, more, cid_string
+    return good_time_users, swipe_course, more
 
 @app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
 def get_swipe_times(zip, date, offset):
@@ -964,9 +966,9 @@ def get_swipe_times(zip, date, offset):
     print(user)
     cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
-    good_time_users, swipe_course, cid_string = swipetime_helper(connection, date, offset, user, good_courses, True)
+    good_time_users, swipe_course, more, cid_string = swipetime_helper(connection, date, offset, user, good_courses, True)
     print(good_courses)
-    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string}
+    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string, 'more': more}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/swipetimes/<string:courses>/<string:date>/<string:offset>')
@@ -975,8 +977,8 @@ def get_time_users(courses, date, offset):
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
     good_courses = courses.split('-')
-    good_time_users, swipe_course = swipetime_helper(connection, date, offset, user, good_courses, False)
-    context = {'good_time_users': good_time_users, 'swipe_course': swipe_course}
+    good_time_users, swipe_course, more = swipetime_helper(connection, date, offset, user, good_courses, False)
+    context = {'good_time_users': good_time_users, 'swipe_course': swipe_course, 'more': more}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
