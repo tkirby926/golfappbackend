@@ -948,9 +948,8 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
         print(len(good_time_id))
         if len(good_time_id) > 1:
             more = True
-            good_time_id = good_time_id[0]
         if len(good_time_id) > 0:
-            good_time_id = good_time_id[0]
+            good_time_id = good_time_id[0][0]
             cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
             good_time_users = cursor.fetchall()
             cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
