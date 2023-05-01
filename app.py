@@ -1107,7 +1107,7 @@ def friends_in_time_helper(connection, good_user_times, userid):
     friends_in_time = []
     for i in good_user_times:
         print(i)
-        cursor = run_query(connection, "SELECT U.firstname, U.lastname FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                         "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)));", (str(i[4]), userid, userid))
         user_friends = list(cursor.fetchall())
         friends_in_time.append(user_friends)
