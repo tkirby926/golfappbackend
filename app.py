@@ -1526,6 +1526,7 @@ stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJ
 @app.route('/create-payment-intent', methods=['POST'])
 def create_payment():
     data = flask.json.loads(flask.request.data)
+    print(data['num_users'])
     cost = calculate_order_amount(data['timeid'])
     print(round((int(data['num_users']) * (cost + (cost*.0816))), 2))
     intent = stripe.PaymentIntent.create(
