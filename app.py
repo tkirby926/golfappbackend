@@ -544,6 +544,9 @@ def check_reset_id(resetid):
 @app.route('/api/v1/set_pass', methods =["PUT"])
 def set_new_pass():
     req = flask.request.json
+    if len(req['new_pass']) < 8 or len(req['username']) > 30:
+        context = {'error': 'Password must be between 8 and 30 characters'}
+        return flask.jsonify(**context)
     pass_dict = {}
     pass_dict['password'] = req['new_pass']
     pass_dict['algorithm'] = 'sha512'
@@ -1362,6 +1365,9 @@ def create_user():
     if req['user'] == '0':
         if len(req['username']) < 6 or len(req['username']) > 15:
             context = {'error': 'Username must be between 6 and 15 characters'}
+            return flask.jsonify(**context)
+        if len(req['password']) < 8 or len(req['username']) > 30:
+            context = {'error': 'Password must be between 8 and 30 characters'}
             return flask.jsonify(**context)
         if any(not c.isalnum() for c in req['username']):
             context = {'error': 'Username cannot have special characters (letters and numbers only)'}
