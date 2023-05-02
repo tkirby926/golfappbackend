@@ -131,6 +131,10 @@ def create_tables():
         username varchar(20) DEFAULT NULL,
         emailcode varchar(16) DEFAULT NULL
         )""")
+    cursor = run_query_basic(connection, """CREATE TABLE paymentintents (
+        intent varchar(100) DEFAULT NULL,
+        numusers int DEFAULT NULL
+        )""")
     cursor = run_query_basic(connection, """CREATE TABLE emailconf (
         username varchar(20) DEFAULT NULL,
         emailcode varchar(16) DEFAULT NULL
@@ -1145,14 +1149,14 @@ def get_friends_times_search(search):
         context = {'good_user_times': [], 'user_friends': []}
         return flask.jsonify(**context)
     search = search + '%'
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE (U.username like " + 
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE (U.username like " + 
     "%s OR U.firstname like %s OR U.lastname like %s OR CONCAT(U.firstname, ' ', U.lastname) like %s) AND ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) LIMIT 2;", (search, search, search, search, userid, userid))
     good_user_times = cursor.fetchall()
     friends_in_time = []
     print({'good_user_times': good_user_times})
     print('hihihih')
     for i in good_user_times:
-        cursor = run_query(connection, "SELECT U.firstname, U.lastname FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                         "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)));", (str(i[4]), userid, userid))
         user_friends = list(cursor.fetchall())
         print('hihihih')
@@ -1515,8 +1519,7 @@ def register_course():
     context = {'error': ''}
     return flask.jsonify(**context)
 
-def calculate_order_amount(timeid, num_users):
-    connection = create_server_connection()
+def calculate_order_amount(connection, timeid, num_users):
     cursor = run_query(connection, "SELECT cost FROM TEETIMES WHERE timeid = %s;", (timeid, ))
     print(float(num_users))
     print('ahdfdsfkdsfa')
@@ -1527,15 +1530,17 @@ stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJ
 
 @app.route('/create-payment-intent', methods=['POST'])
 def create_payment():
+    connection = create_server_connection()
     data = flask.json.loads(flask.request.data)
     print(data['num_users'])
-    cost = calculate_order_amount(data['timeid'], data['num_users'])
+    cost = calculate_order_amount(connection, data['timeid'], data['num_users'])
     print(round((int(data['num_users']) * (cost + (cost*.0816))), 2))
     intent = stripe.PaymentIntent.create(
         amount= int(round((cost + (cost*.0816)), 2) * 100),
         currency='usd',
         payment_method_types=["card"],
     )
+    cursor = run_query(connection, "INSERT INTO paymentintents (intent, numusers) VALUES (%s, %s);", (intent['client_secret'], data['numusers']))
     return flask.jsonify({
         'clientSecret': intent['client_secret'],
         'cost': cost
@@ -1759,6 +1764,7 @@ def create_friend_req():
 def add_receipt():
     req = flask.request.json
     connection = create_server_connection()
+    cursor = run_query(connection, "SELECT COUNT(*) FROM paymentintents where intent = %s AND numusers = %s;", (req['secret'], req['numusers']))
     cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['time'], req['course'], req['cost']))
     return flask.jsonify("")
 
