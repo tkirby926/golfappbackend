@@ -1519,6 +1519,7 @@ def calculate_order_amount(timeid, num_users):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT cost FROM TEETIMES WHERE timeid = %s;", (timeid, ))
     print(float(num_users))
+    print('ahdfdsfkdsfa')
     cost = float(cursor.fetchone()[0]) * float(num_users)
     return cost
 
