@@ -1515,10 +1515,10 @@ def register_course():
     context = {'error': ''}
     return flask.jsonify(**context)
 
-def calculate_order_amount(timeid):
+def calculate_order_amount(timeid, num_users):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT cost FROM TEETIMES WHERE timeid = %s;", (timeid, ))
-    cost = float(cursor.fetchone()[0])
+    cost = float(cursor.fetchone()[0]) * float(num_users)
     return cost
 
 stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJXLmKILzRLYFEr8xY3yXXJRGJSWcIdduPJ5n001apPDssN'
@@ -1527,7 +1527,7 @@ stripe.api_key = 'sk_test_51LIIQAG2PmM18WKObcR2HE4AzVIwEZ1vwp75XdDi6IawslHyWzVtJ
 def create_payment():
     data = flask.json.loads(flask.request.data)
     print(data['num_users'])
-    cost = calculate_order_amount(data['timeid'])
+    cost = calculate_order_amount(data['timeid'], data['num_users'])
     print(round((int(data['num_users']) * (cost + (cost*.0816))), 2))
     intent = stripe.PaymentIntent.create(
         amount= int(round((cost + (cost*.0816)), 2) * 100),
