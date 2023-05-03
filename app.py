@@ -1784,7 +1784,7 @@ def accept_friend_req(accepted_user):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/cancel_request/<string:cancelled_user>', methods=["DELETE"])
-def accept_friend_req(cancelled_user):
+def cancel_friend_req(cancelled_user):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     cancelling_user = user_helper(connection, user)
