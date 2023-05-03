@@ -1783,6 +1783,19 @@ def accept_friend_req(accepted_user):
     context = {'message': message}
     return flask.jsonify(**context)
 
+@app.route('/api/v1/cancel_request/<string:cancelled_user>', methods=["DELETE"])
+def accept_friend_req(cancelled_user):
+    connection = create_server_connection()
+    user = flask.request.cookies.get('username')
+    cancelling_user = user_helper(connection, user)
+    if cancelling_user == False:
+        context = {'not_user': True}
+        return flask.jsonify(**context)
+    cursor = run_query(connection, "DELETE FROM REQUESTEDFRIENDS WHERE username1 = %s AND username2 = %s;", (cancelling_user, cancelled_user))
+    message = "completed"
+    context = {'message': message}
+    return flask.jsonify(**context)
+
 @app.route('/api/v1/deny_request/<string:accepted_user>', methods=["DELETE"])
 def deny_friend_req(accepted_user):
     connection = create_server_connection()
