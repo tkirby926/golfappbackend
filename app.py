@@ -891,7 +891,6 @@ def get_user_profile(user2):
     cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
                                    " IN (SELECT timeid FROM BOOKEDTIMES WHERE username = %s);", (user2, ))
     tee_times = cursor.fetchall()
-    friends_in_time = friends_in_time_helper(connection, tee_times, user1)
     more = True
     if (len(posts) != 3):
         more = False
@@ -907,7 +906,7 @@ def get_user_profile(user2):
             status = "r"
             if (cursor.fetchone()[0] == 0):
                 status = "n"   
-    context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times, 'friends_in_time': friends_in_time}
+    context = {"user": user, 'logged_user': is_logged_user, "status": status, "posts": posts, "has_more_posts": more, 'tee_times': tee_times}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/logout')
