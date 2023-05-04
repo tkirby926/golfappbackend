@@ -928,7 +928,7 @@ def course_log_out():
     return resp
 
 def swipetime_helper(connection, date, offset, user, good_courses, first):
-    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE "
+    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE ("
     cid_string = ''
     for i, item in enumerate(good_courses):
         if i != len(good_courses) - 1:
@@ -940,10 +940,10 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
                 cid_string += item + '-'
         else:
             if (first):
-                query = query + "C.uniqid = " + str(item[6]) + " "
+                query = query + "C.uniqid = " + str(item[6]) + ") "
                 cid_string += str(item[6])
             else:
-                query = query + "C.uniqid = " + item + " "
+                query = query + "C.uniqid = " + item + ") "
                 cid_string += item
     query = query + "AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND CAST(T.teetime AS DATE) = %s AND B.username = U.username ORDER BY ABS(U.drinking - %s) + ABS(U.score - %s) + ABS(U.wager - %s) + ABS(U.cart - %s) + ABS(U.age - %s) + ABS(U.music - %s) LIMIT 2 OFFSET %s;"
     swipe_course = []
