@@ -1208,10 +1208,11 @@ def get_courses_times(courseid, date):
     context = {'course_info': course_info, 'course_times': course_times}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/courses/<string:courseid>')
-def get_courses_info(courseid):
+@app.route('/api/v1/courses')
+def get_courses_info():
     connection = create_server_connection()
-    courseid = user_helper(connection, courseid)
+    user = flask.request.cookies.get('course_user')
+    courseid = user_helper(connection, user)
     if courseid == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
