@@ -869,7 +869,7 @@ def get_search_courses(search, page, limit):
 def get_search_location(search):
     connection = create_server_connection()
     search = '%' + search + '%'
-    cursor = run_query(connection, "SELECT * from citydata where city LIKE %s LIMIT 4;", (search,))
+    cursor = run_query(connection, "SELECT * from citydata where city LIKE %s OR CONCAT(city, ', ', state_id) LIKE %s LIMIT 4;", (search, search))
     loc_results = cursor.fetchall()
     cursor = run_query(connection, "SELECT uniqid, coursename, imageurl, street, town, state, zip FROM COURSES WHERE coursename LIKE " +
     "%s LIMIT 3;", (search,))
