@@ -159,6 +159,12 @@ def create_tables():
         messageid int NOT NULL AUTO_INCREMENT,
         PRIMARY KEY (messageid)
         )""")
+    cursor = run_query_basic(connection, """CREATE TABLE citydata (
+        city varchar(40) DEFAULT NULL,
+        state_id varchar(2) DEFAULT NULL,
+        lat varchar(5) DEFAULT NULL,
+        lng varchar(5) DEFAULT NULL
+        )""")
     cursor = run_query_basic(connection, """CREATE TABLE posts (
         content varchar(700) DEFAULT NULL,
         username varchar(20) DEFAULT NULL,
@@ -1061,6 +1067,17 @@ def get_tee_sheet(date):
         users_in_time.append(cursor.fetchall())
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
+
+@app.route('/api/v1/load_cities')
+def load_cities():
+    connection = create_server_connection()
+    cursor = run_query_basic(connection, """LOAD DATA INFILE 'uscities.csv'
+INTO TABLE citydata
+FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(city, state_id, lat, lng);""")
+
 
 @app.route('/api/v1/course/date_transactions/<string:date>')
 def get_date_transactions(date):
