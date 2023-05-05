@@ -1068,7 +1068,7 @@ def get_tee_sheet(date):
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/load_cities')
+@app.route('/api/v1/load_cities', methods=["POST"])
 def load_cities():
     connection = create_server_connection()
     cursor = run_query_basic(connection, """LOAD DATA INFILE '/uscities.csv'
