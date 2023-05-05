@@ -1072,11 +1072,12 @@ def get_tee_sheet(date):
 def load_cities():
     connection = create_server_connection()
     cursor = run_query_basic(connection, """LOAD DATA INFILE '/uscities.csv'
-INTO TABLE citydata
-FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS
-(city, state_id, lat, lng);""")
+    INTO TABLE citydata
+    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 ROWS
+    (city, state_id, lat, lng);""")
+    return {'loaded': 'yes'}
 
 
 @app.route('/api/v1/course/date_transactions/<string:date>')
