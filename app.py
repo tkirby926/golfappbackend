@@ -255,7 +255,6 @@ def create_server_connection():
 
 def run_query(connection, query, variables):
     cursor = connection.cursor(buffered = True)
-    print('hi')
     try:
         cursor.execute(query, variables)
         connection.commit()
@@ -864,6 +863,18 @@ def get_search_courses(search, page, limit):
     if len(results) < 20:
         last = True
     context = {"results": results, "last": last} 
+    return flask.jsonify(**context)
+
+@app.route('/api/v1/search/locations/<string:search>')
+def get_search_courses(search):
+    connection = create_server_connection()
+    search = '%' + search + '%'
+    cursor = run_query(connection, "SELECT * from citydata where city LIKE %s LIMIT 4;", (search,))
+    loc_results = cursor.fetchall()
+    cursor = run_query(connection, "SELECT uniqid, coursename, imageurl, street, town, state, zip FROM COURSES WHERE coursename LIKE " +
+    "%s LIMIT 3;", (search,))
+    course_results = cursor.fetchall()
+    context = {"loc_results": loc_results, "course_results": course_results} 
     return flask.jsonify(**context)
 
 @app.route('/api/v1/search/any_course/<string:limit>')
