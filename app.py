@@ -968,17 +968,25 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
         return good_time_users, swipe_course, more, cid_string
     return good_time_users, swipe_course, more
 
-@app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
-def get_swipe_times(zip, date, offset):
-    lat, lon = location_search_helper(zip)
+def get_swipe_times_helper(lat, lon, date, offset):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
-    print(user)
     cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, uniqid, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
     good_courses = cursor.fetchall()
     good_time_users, swipe_course, more, cid_string = swipetime_helper(connection, date, offset, user, good_courses, True)
-    print(good_courses)
+    return good_courses, swipe_course, good_time_users, cid_string, more
+
+@app.route('/api/v1/teetimes/<string:zip>/<string:date>/<string:offset>')
+def get_swipe_times(zip, date, offset):
+    lat, lon = location_search_helper(zip)
+    good_courses, swipe_course, good_time_users, cid_string, more = get_swipe_times_helper(lat, lon, date, offset)
+    context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string, 'more': more}
+    return flask.jsonify(**context)
+
+@app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
+def get_times_city(lat, lon, date):
+    good_courses, swipe_course, good_time_users, cid_string, more = get_swipe_times_helper(lat, lon, date, '0')
     context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string, 'more': more}
     return flask.jsonify(**context)
 
@@ -992,21 +1000,7 @@ def get_time_users(courses, date, offset):
     context = {'good_time_users': good_time_users, 'swipe_course': swipe_course, 'more': more}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
-def get_times_city(lat, lon, date):
-    connection = create_server_connection()
-    cursor = run_query(connection, "SELECT *, SQRT(POWER((%s - latitude), 2) + POWER((%s - longitude), 2)) AS X FROM COURSES ORDER BY X LIMIT 5;", (lat, lon))
-    good_courses = cursor.fetchall()
-    good_times = []
-    for i in good_courses:
-        cursor = run_query(connection, "SELECT t.timeid, t.cost, c.coursename FROM TEETIMES t, COURSES c WHERE c.coursename=" +
-                                        "%s AND c.uniqid = t.uniqid AND CAST(teetime AS DATE) = %s AND t.timeid IN (SELECT DISTINCT timeid FROM BOOKEDTIMES);", (i[4], date))
-        good_times = cursor.fetchall()
-        print(good_times)
-        random.shuffle(good_times)
-    print(good_courses)
-    context = {'good_courses': good_courses, 'good_times': good_times}
-    return flask.jsonify(**context)
+
 
 @app.route('/api/v1/posts/<int:page>')
 def get_all_posts(page):
