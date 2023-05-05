@@ -27,6 +27,7 @@ BUCKET = 'golftribephotos'
 MAIL_API_KEY = '8556fb8b6ff1ddbd28dd5b52ef62f21e-181449aa-aac0ab8b'
 
 
+
 def create_tables():
     connection = create_server_connection()
     print('yoink')
@@ -70,8 +71,9 @@ def create_tables():
         zip VARCHAR(5) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
-
-
+    
+    cursor = run_query_basic(connection, """SET GLOBAL max_questions = 1000000000;""")
+    cursor = run_query_basic(connection, """DROP TABLE citydata;""")
     cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
         username varchar(20) DEFAULT NULL,
         timeid varchar(20) DEFAULT NULL,
@@ -1067,17 +1069,7 @@ def get_tee_sheet(date):
         users_in_time.append(cursor.fetchall())
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
-
-@app.route('/api/v1/load_cities', methods=["POST"])
-def load_cities():
-    connection = create_server_connection()
-    cursor = run_query_basic(connection, """LOAD DATA INFILE '/uscities.csv'
-    INTO TABLE citydata
-    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 ROWS
-    (city, state_id, lat, lng);""")
-    return {'loaded': 'yes'}
+    
 
 @app.route('/api/v1/check_cities')
 def check_cities():
