@@ -343,12 +343,6 @@ if __name__ == '__main__':
 @app.route('/')
 def home():
     create_tables()
-    trigger = CronTrigger(
-        year="*", month="*", day="*", hour=3, minute=0, second=0
-    )
-    scheduler = BackgroundScheduler(daemon=False)
-    scheduler.start()
-    scheduler.add_job(func=job, trigger=trigger)
     return 'flask app'
     # connection = create_server_connection()
     # run_query(connection, """CREATE TABLE Friendships (UserId1 VARCHAR(20), UserId2 VARCHAR(20));""")
@@ -1534,7 +1528,7 @@ def create_payment():
         currency='usd',
         payment_method_types=["card"],
     )
-    cursor = run_query(connection, "INSERT INTO paymentintents (intent, numusers) VALUES (%s, %s);", (intent['client_secret'], data['numusers']))
+    cursor = run_query(connection, "INSERT INTO paymentintents (intent, numusers) VALUES (%s, %s);", (intent['client_secret'], data['num_users']))
     return flask.jsonify({
         'clientSecret': intent['client_secret'],
         'cost': cost
