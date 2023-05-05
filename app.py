@@ -1079,6 +1079,11 @@ def load_cities():
     (city, state_id, lat, lng);""")
     return {'loaded': 'yes'}
 
+@app.route('/api/v1/check_cities')
+def check_cities():
+    connection = create_server_connection()
+    cursor = run_query_basic(connection, """SELECT * FROM citydata;""")
+    return flask.jsonify({'cities': cursor.fetchall()})
 
 @app.route('/api/v1/course/date_transactions/<string:date>')
 def get_date_transactions(date):
