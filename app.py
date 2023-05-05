@@ -1071,7 +1071,7 @@ def get_tee_sheet(date):
 @app.route('/api/v1/load_cities')
 def load_cities():
     connection = create_server_connection()
-    cursor = run_query_basic(connection, """LOAD DATA INFILE 'uscities.csv'
+    cursor = run_query_basic(connection, """LOAD DATA INFILE '/uscities.csv'
 INTO TABLE citydata
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
