@@ -866,7 +866,7 @@ def get_search_courses(search, page, limit):
     return flask.jsonify(**context)
 
 @app.route('/api/v1/search/locations/<string:search>')
-def get_search_courses(search):
+def get_search_location(search):
     connection = create_server_connection()
     search = '%' + search + '%'
     cursor = run_query(connection, "SELECT * from citydata where city LIKE %s LIMIT 4;", (search,))
