@@ -1027,13 +1027,13 @@ def get_time_users(courses, date, offset):
 def get_all_posts(page):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
+    user = user_helper_posts(connection, user)
     print(user)
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, P.postid FROM Posts P WHERE P.username = %s OR P.username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
-                                    "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user, user, user, page * 5))
+                                    "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2))) ORDER BY timestamp DESC LIMIT 6 OFFSET %s;", (user[0], user[0], user[0], page * 5))
     posts = cursor.fetchall()
     img_urls = []
     coms = []
@@ -1045,7 +1045,7 @@ def get_all_posts(page):
     more = False
     if (len(posts) == 6):
         more = True
-    context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls, 'comments': coms}
+    context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls, 'comments': coms, 'image_url': user[1]}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/single_post/<int:pid>')
