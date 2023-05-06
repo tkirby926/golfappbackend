@@ -71,9 +71,6 @@ def create_tables():
         zip VARCHAR(5) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
-    
-    cursor = run_query_basic(connection, """SET GLOBAL max_questions = 1000000000;""")
-    cursor = run_query_basic(connection, """DROP TABLE citydata;""")
     cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
         username varchar(20) DEFAULT NULL,
         timeid varchar(20) DEFAULT NULL,
