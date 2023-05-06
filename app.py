@@ -1045,7 +1045,7 @@ def get_all_posts(page):
     more = False
     if (len(posts) == 6):
         more = True
-    context = {'posts': posts, 'has_more_posts': more, 'user': user, 'img_urls': img_urls, 'comments': coms, 'image_url': user[1]}
+    context = {'posts': posts, 'has_more_posts': more, 'user': user[0], 'img_urls': img_urls, 'comments': coms, 'image_url': user[1]}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/single_post/<int:pid>')
@@ -1061,7 +1061,7 @@ def get_single_post(pid):
     posts_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT P.content, P.username, U.imageurl, U.firstname, U.lastname, P.timestamp FROM PostComments P, USERS U WHERE P.username = U.username AND P.postid = %s ORDER BY P.timestamp DESC;", (pid, ))
     comments = cursor.fetchall()
-    context = {'post': posts_info, 'comments': comments, 'user': user, 'image_url': user[1]}
+    context = {'post': posts_info, 'comments': comments, 'user': user[0], 'image_url': user[1]}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/email/<string:email>')
@@ -1942,7 +1942,7 @@ def get_posts():
     more = True
     if (len(posts) != 3):
         more = False
-    context = {'has_more': more, 'posts': posts, 'user': user, 'image_url': imageurl}
+    context = {'has_more': more, 'posts': posts, 'user': user[0], 'image_url': imageurl}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/message_count/<string:user2>')
