@@ -292,7 +292,7 @@ def user_helper(connection, user):
 def user_helper_posts(connection, user):
     if user is None or user == 'null':
         return False
-    cursor = run_query(connection, "SELECT username, imageurl FROM COOKIES WHERE sessionid = %s;", (user,))
+    cursor = run_query(connection, "SELECT C.username, U.imageurl FROM COOKIES C, USERS U WHERE sessionid = %s AND U.username = C.username;", (user,))
     user = cursor.fetchone()
     if user[0] is None:
         return False
