@@ -1,6 +1,7 @@
 
 from cProfile import run
 from crypt import methods
+from email.mime import image
 import flask
 from jinja2 import Undefined
 import mysql.connector
@@ -287,6 +288,16 @@ def user_helper(connection, user):
         return False
     username = list(username)
     return username[0]
+
+def user_helper_posts(connection, user):
+    if user is None or user == 'null':
+        return False
+    cursor = run_query(connection, "SELECT username, imageurl FROM COOKIES WHERE sessionid = %s;", (user,))
+    user = cursor.fetchone()
+    if user[0] is None:
+        return False
+    user = list(user)
+    return user
 
 # def admin_helper(connection, user):
 #     if user is None or user == 'null':
@@ -1041,7 +1052,7 @@ def get_all_posts(page):
 def get_single_post(pid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
+    user = user_helper_posts(connection, user)
     print(user)
     if user == False:
         context = {'not_user': True}
@@ -1050,7 +1061,7 @@ def get_single_post(pid):
     posts_info = cursor.fetchone()
     cursor = run_query(connection, "SELECT P.content, P.username, U.imageurl, U.firstname, U.lastname, P.timestamp FROM PostComments P, USERS U WHERE P.username = U.username AND P.postid = %s ORDER BY P.timestamp DESC;", (pid, ))
     comments = cursor.fetchall()
-    context = {'post': posts_info, 'comments': comments, 'user': user}
+    context = {'post': posts_info, 'comments': comments, 'user': user, 'image_url': user[1]}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/email/<string:email>')
@@ -1921,16 +1932,17 @@ def get_message_previews():
 def get_posts():
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
+    user = user_helper_posts(connection, user)
     if user == False:
         context = {'not_user': True, 'posts': [], 'has_more': False, 'user': []}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT * FROM Posts WHERE username = %s ORDER BY timestamp DESC LIMIT 3;", (user, ))
+    cursor = run_query(connection, "SELECT * FROM Posts WHERE username = %s ORDER BY timestamp DESC LIMIT 3;", (user[0], ))
     posts = cursor.fetchall()
+    imageurl = user[1]
     more = True
     if (len(posts) != 3):
         more = False
-    context = {'has_more': more, 'posts': posts, 'user': user}
+    context = {'has_more': more, 'posts': posts, 'user': user, 'image_url': imageurl}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/message_count/<string:user2>')
@@ -1988,13 +2000,13 @@ def get_admins():
 def get_my_times():
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
-    user = user_helper(connection, user)
+    user = user_helper_posts(connection, user)
     if user == False:
         context = {'not_user': True, 'my_times': [], 'my_posts': [], 'has_more_posts': False, 'my_friends': [], 'has_more_friends': False}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Courses C, Teetimes T, BookedTimes B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user, ))
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Courses C, Teetimes T, BookedTimes B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user[0], ))
     my_times = cursor.fetchall()
-    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, P.postid FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user, ))
+    cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, P.postid FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user[0], ))
     my_posts = cursor.fetchall()
     coms = []
     for i in my_posts:
@@ -2003,8 +2015,8 @@ def get_my_times():
     has_more_posts = False
     if (len(my_posts) == 4):
         has_more_posts: True
-    my_friends, has_more_friends = get_my_friends_helper(connection, user, '0', False)
-    context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends, 'post_coms': coms}
+    my_friends, has_more_friends = get_my_friends_helper(connection, user[0], '0', False)
+    context = {'my_times': my_times, 'my_posts': my_posts, 'has_more_posts': has_more_posts, 'my_friends': my_friends, 'has_more_friends': has_more_friends, 'post_coms': coms, 'image_url': user[1]}
     return flask.jsonify(**context)
 
 @app.route('/api/v1/my_posts/')
