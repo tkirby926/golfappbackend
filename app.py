@@ -72,11 +72,6 @@ def create_tables():
         zip VARCHAR(5) DEFAULT NULL,
         PRIMARY KEY (username)
         )""")
-    cursor = run_query_basic(connection, """CREATE TABLE paymentpromises (
-        username varchar(20) DEFAULT NULL,
-        timeid varchar(20) DEFAULT NULL,
-        num_users varchar(2) DEFAULT NULL
-        )""")
 
     cursor = run_query_basic(connection, """CREATE TABLE admins (
         username varchar(20) DEFAULT NULL
@@ -85,13 +80,6 @@ def create_tables():
         email varchar(320) DEFAULT NULL,
         resetid varchar(16) DEFAULT NULL,
         timestamp datetime DEFAULT NULL
-        )""")
-    cursor = run_query_basic(connection, """CREATE TABLE bookedtimes (
-        username varchar(20) DEFAULT NULL,
-        timeid varchar(20) DEFAULT NULL,
-        KEY username (username),
-        KEY timeid (timeid),
-        CONSTRAINT bookedtimes_ibfk_1 FOREIGN KEY (username) REFERENCES USERS (username)
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE cookies (
         username varchar(20) DEFAULT NULL,
@@ -145,10 +133,10 @@ def create_tables():
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE ledger (
         timeid varchar(20) DEFAULT NULL,
-        uniqid varchar(20) DEFAULT NULL,
         Cost varchar(20) DEFAULT NULL,
-        user varchar(20) DEFAULT NULL,
-        timestamp datetime DEFAULT NULL
+        username varchar(20) DEFAULT NULL,
+        timestamp datetime DEFAULT NULL,
+        numusers int DEFAULT NULL
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE messages (
         content varchar(700) DEFAULT NULL,
@@ -216,7 +204,7 @@ def job():
         hours = j[2].seconds//3600
         minutes = (j[2].seconds//60)%60
         right_time = four_weeks.replace(hour=int(hours), minute=int(minutes), second=0)
-        cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots, cart) VALUES (%s, %s, %s, 4, 0);", (str(j[0]), str(right_time), str(j[3])))
+        cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, cart) VALUES (%s, %s, %s, 0);", (str(j[0]), str(right_time), str(j[3])))
     context = {'message': 'completed nightly batch'}
 
 # refresh_token = "3Zn9qMSYVyAAAAAAAAAAAVPUsKUA33XATk-8tKujM1V8q0WcihZevxGE5x46ZZF5"
@@ -469,7 +457,7 @@ def swiper_api(zip_url_slug, length_url_slug, firstdate_url_slug, firsttime_url_
         print(haversine(coord1, coord2))
         if (haversine(coord1, coord2)/1.609344 < float(length_url_slug)):
             good_courses.append([i[0], i[1], i[4]])
-            cursor = run_query(connection, """SELECT T.timeid, T.teetime, T.cost FROM TEETIMES T, BOOKEDTIMES B, COURSES C, USERS U WHERE
+            cursor = run_query(connection, """SELECT T.timeid, T.teetime, T.cost FROM TEETIMES T, LEDGER B, COURSES C, USERS U WHERE
                                               B.timeid = T.timeid AND T.uniqid = """ + i[0] + " AND T.")
     context = {'good': firsttime_url_slug, 'bad': 'no'}
     return flask.jsonify(**context)
@@ -730,7 +718,7 @@ def check_in_time(timeid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT T.teetime, C.Coursename, T.Cost, T.Spots FROM BOOKEDTIMES B, COURSES C, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.teetime > CURRENT_TIMESTAMP;", (user, timeid))
+    cursor = run_query(connection, "SELECT T.teetime, C.Coursename, T.Cost, (4 - SUM(B.numusers)) FROM LEDGER B, COURSES C, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.teetime > CURRENT_TIMESTAMP;", (user, timeid))
     in_time = True
     time_info = cursor.fetchone()
     print(time_info)
@@ -777,7 +765,7 @@ def get_booked_times():
     if user == False:
         context = {'not_user': True}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT T.timeid, C.Coursename, T.teetime FROM Courses C, Teetimes T, Bookedtimes B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND B.username = %s ORDER BY teetime;", (user, ))
+    cursor = run_query(connection, "SELECT T.timeid, C.Coursename, T.teetime FROM Courses C, Teetimes T, LEDGER B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND B.username = %s ORDER BY teetime;", (user, ))
     times_booked = cursor.fetchall()
     context = {'times_booked': times_booked}
     return flask.jsonify(**context)
@@ -909,8 +897,8 @@ def get_user_profile(user2):
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT * from POSTS where username = %s ORDER BY timestamp DESC LIMIT 3;", (user2, ))
     posts = cursor.fetchall()
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
-                                   " IN (SELECT timeid FROM BOOKEDTIMES WHERE username = %s);", (user2, ))
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, (4 - SUM(B.numusers)), T.timeid FROM Teetimes T, Courses C, LEDGER B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.timeid" + 
+                                   " IN (SELECT timeid FROM LEDGER WHERE username = %s);", (user2, ))
     tee_times = cursor.fetchall()
     more = True
     if (len(posts) != 3):
@@ -949,7 +937,7 @@ def course_log_out():
     return resp
 
 def swipetime_helper(connection, date, offset, user, good_courses, first):
-    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, BOOKEDTIMES B, USERS U WHERE ("
+    query = "SELECT DISTINCT T.timeid FROM COURSES C, TEETIMES T, LEDGER B, USERS U WHERE ("
     cid_string = ''
     for i, item in enumerate(good_courses):
         if i != len(good_courses) - 1:
@@ -981,9 +969,9 @@ def swipetime_helper(connection, date, offset, user, good_courses, first):
             more = True
         if len(good_time_id) > 0:
             good_time_id = good_time_id[0][0]
-            cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, BOOKEDTIMES B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
+            cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl, age FROM USERS U, LEDGER B WHERE U.username = B.username AND B.timeid = %s;", (good_time_id,))
             good_time_users = cursor.fetchall()
-            cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, spots, holes FROM COURSES C, TEETIMES T WHERE T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
+            cursor = run_query(connection, "SELECT coursename, street, town, state, zip, imageurl, C.uniqid, teetime, timeid, cost, (4 - SUM(B.numusers)), holes FROM COURSES C, TEETIMES T, BOOKEDTIMES B WHERE B.timeid = T.timeid AND T.uniqid = C.uniqid AND t.timeid = %s;", (good_time_id, ))
             swipe_course = cursor.fetchone()
     if (first):
         return good_time_users, swipe_course, more, cid_string
@@ -1084,7 +1072,7 @@ def get_tee_sheet(date):
     times = cursor.fetchall()
     users_in_time = []
     for i in times:
-        cursor = run_query(connection, "SELECT B.username, U.firstname, U.lastname FROM USERS U, BOOKEDTIMES B WHERE B.username = U.username AND B.timeid = %s;", (str(i[1]), ))
+        cursor = run_query(connection, "SELECT B.username, U.firstname, U.lastname FROM USERS U, LEDGER B WHERE B.username = U.username AND B.timeid = %s;", (str(i[1]), ))
         users_in_time.append(cursor.fetchall())
     context = {'tee_times': times, 'users': users_in_time}
     return flask.jsonify(**context)
@@ -1135,15 +1123,15 @@ def friends_in_time_helper(connection, good_user_times, userid):
     friends_in_time = []
     for i in good_user_times:
         print(i)
-        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, LEDGER B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                         "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)));", (str(i[4]), userid, userid))
         user_friends = list(cursor.fetchall())
         friends_in_time.append(user_friends)
     return friends_in_time
 
 def get_friends_times_helper(connection, userid):
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + 
-                                   " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, (4 - SUM(B.numusers)), T.timeid, T.cart FROM Teetimes T, Courses C, LEDGER B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.timeid" + 
+                                   " IN (SELECT timeid FROM LEDGER WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                     "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) LIMIT 2;", (userid, userid))
     good_user_times = cursor.fetchall()
     friends_in_time = friends_in_time_helper(connection, good_user_times, userid)
@@ -1170,14 +1158,14 @@ def get_friends_times_search(search):
         context = {'good_user_times': [], 'user_friends': []}
         return flask.jsonify(**context)
     search = search + '%'
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Teetimes T, Courses C WHERE C.uniqid = T.uniqid AND T.timeid" + " IN (SELECT timeid FROM BOOKEDTIMES WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE (U.username like " + 
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, (4 - SUM(B.numusers)), T.timeid, T.cart FROM Teetimes T, Courses C, LEDGER B WHERE B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.timeid" + " IN (SELECT timeid FROM LEDGER WHERE username IN (SELECT U.username FROM USERS U, Friendships F WHERE (U.username like " + 
     "%s OR U.firstname like %s OR U.lastname like %s OR CONCAT(U.firstname, ' ', U.lastname) like %s) AND ((F.userid2 = %s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)))) LIMIT 2;", (search, search, search, search, userid, userid))
     good_user_times = cursor.fetchall()
     friends_in_time = []
     print({'good_user_times': good_user_times})
     print('hihihih')
     for i in good_user_times:
-        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, BOOKEDTIMES B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
+        cursor = run_query(connection, "SELECT U.firstname, U.lastname, U.imageurl FROM USERS U, LEDGER B WHERE B.timeid = %s AND B.username = U.username AND B.username in (SELECT U.username FROM USERS U, Friendships F WHERE ((F.userid2 = " +
                                         "%s AND U.Username = F.userid1) OR (F.userid1 = %s AND U.Username = F.userid2)));", (str(i[4]), userid, userid))
         user_friends = list(cursor.fetchall())
         print('hihihih')
@@ -1187,23 +1175,23 @@ def get_friends_times_search(search):
     return flask.jsonify(**context)
 
 
-@app.route('/api/v1/remove_time_spot/<string:timeid>')
-def start_transaction(timeid):
-    connection = create_server_connection()
-    cursor = run_query(connection, "SELECT spots from Teetimes where timeid = %s;", (timeid, ))
-    if (cursor.fetchone()[0] > 0):
-        cursor = run_query(connection, "UPDATE Teetimes set spots = spots - 1 WHERE timeid = %s;", (timeid, ))
-        context = {'error': 'none'}
-    else:
-        context = {'error': 'spot taken'}
-    return flask.jsonify(**context)
+# @app.route('/api/v1/remove_time_spot/<string:timeid>')
+# def start_transaction(timeid):
+#     connection = create_server_connection()
+#     cursor = run_query(connection, "SELECT (4 - SUM(B.numusers)) from Ledger where timeid = %s;", (timeid, ))
+#     if (cursor.fetchone()[0] > 0):
+#         cursor = run_query(connection, "UPDATE Teetimes set spots = spots - 1 WHERE timeid = %s;", (timeid, ))
+#         context = {'error': 'none'}
+#     else:
+#         context = {'error': 'spot taken'}
+#     return flask.jsonify(**context)
 
-@app.route('/api/v1/payment_error/<string:timeid>')
-def transaction_error(timeid):
-    connection = create_server_connection()
-    cursor = run_query(connection, "UPDATE Teetimes set spots = spots + 1 WHERE timeid = %s;", (timeid, ))
-    context = {'error': 'none'}
-    return flask.jsonify(**context)
+# @app.route('/api/v1/payment_error/<string:timeid>')
+# def transaction_error(timeid):
+#     connection = create_server_connection()
+#     cursor = run_query(connection, "UPDATE Teetimes set spots = spots + 1 WHERE timeid = %s;", (timeid, ))
+#     context = {'error': 'none'}
+#     return flask.jsonify(**context)
 
 @app.route('/api/v1/course_info/<string:uniqid>')
 def get_course_info(uniqid):
@@ -1224,8 +1212,8 @@ def get_courses_times(courseid, date):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT coursename, imageurl, street, town, state, zip FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
-    cursor = run_query(connection, "SELECT * FROM TEETIMES WHERE spots > 0 AND uniqid = %s" + 
-    " AND CAST(teetime AS DATE) = %s ORDER BY teetime;", (courseid, date))
+    cursor = run_query(connection, "SELECT * FROM TEETIMES T, LEDGER B WHERE B.timeid = T.timeid AND (4 - SUM(B.numusers)) != 0 AND T.uniqid = %s" + 
+    " AND CAST(T.teetime AS DATE) = %s ORDER BY T.teetime;", (courseid, date))
     course_times = cursor.fetchall()
     context = {'course_info': course_info, 'course_times': course_times}
     return flask.jsonify(**context)
@@ -1962,13 +1950,13 @@ def get_message_count(user2):
 def add_pr(user, timeid):
     connection = create_server_connection()
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT T.teetime, C.coursename FROM BOOKEDTIMES B, TEETIMES T, COURSES C WHERE T.uniqid = C.uniqid AND B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
+    cursor = run_query(connection, "SELECT T.teetime, C.coursename FROM LEDGER B, TEETIMES T, COURSES C WHERE T.uniqid = C.uniqid AND B.username = %s AND B.timeid = %s AND T.timeid = B.timeid AND T.teetimes < CURRENT_TIMESTAMP", (user, timeid))
     general_time_info = cursor.fetchone()
     if (len(general_time_info) == 0):
         context = {"error": "Y"}
         return flask.jsonify(**context)
     cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript," +
-    " wager, cart, imageurl FROM Users U, BOOKEDTIMES B, TEETIMES T WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
+    " wager, cart, imageurl FROM Users U, LEDGER B, TEETIMES T WHERE U.username = B.username AND B.timeid = %s AND U.username != %s", (timeid, user))
     time_users = cursor.fetchall()
     for i in time_users:
         cursor = run_query(connection, "SELECT COUNT(*) FROM FRIENDSHIPS WHERE (userid1 = %s AND userid2 = %s) OR (userid2 = "
@@ -2004,7 +1992,7 @@ def get_my_times():
     if user == False:
         context = {'not_user': True, 'my_times': [], 'my_posts': [], 'has_more_posts': False, 'my_friends': [], 'has_more_friends': False}
         return flask.jsonify(**context)
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.timeid, T.cart FROM Courses C, Teetimes T, BookedTimes B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user[0], ))
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, (4 - SUM(B.numusers)), T.timeid, T.cart FROM Courses C, Teetimes T, LEDGER B WHERE B.username = %s AND B.timeid = T.timeid AND C.uniqid = T.uniqid AND T.teetime > CURRENT_TIMESTAMP;", (user[0], ))
     my_times = cursor.fetchall()
     cursor = run_query(connection, "SELECT P.content, P.username, P.timestamp, P.link, U.imageurl, P.postid FROM Posts P, Users U WHERE U.username = P.Username AND P.username = %s ORDER BY timestamp DESC LIMIT 4;", (user[0], ))
     my_posts = cursor.fetchall()
@@ -2040,10 +2028,10 @@ def get_time_info(timeid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, T.spots, T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl, T.holes FROM Courses C, Teetimes T WHERE T.timeid = " +
+    cursor = run_query(connection, "SELECT C.coursename, T.teetime, T.cost, (4 - SUM(B.numusers)), T.cart, C.street, C.town, C.state, C.zip, C.uniqid, C.imageurl, T.holes FROM Courses C, Teetimes T, LEDGER B WHERE B.timeid = T.timeid AND T.timeid = " +
                                     "%s AND C.uniqid = T.uniqid;", (timeid, ))
     time_info = list(cursor.fetchone())
-    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, BookedTimes B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
+    cursor = run_query(connection, "SELECT U.username, firstname, lastname, email, score, favcourse, drinking, music, favgolf, favteam, college, playstyle, descript, wager, cart, imageurl FROM Users U, LEDGER B WHERE U.username = B.username AND B.timeid = %s;", (timeid, ))
     time_users = cursor.fetchall()
     time_info.append(time_users)
     if user == False:
@@ -2061,7 +2049,7 @@ def get_time_info(timeid):
 @app.route('/api/v1/payment_confirmed/<string:timeid>', methods = ["PUT"])
 def change_spots(timeid):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT spots FROM teetimes WHERE timeid = %s;", (timeid, ))
+    cursor = run_query(connection, "SELECT (4 - SUM(B.numusers)) FROM LEDGER WHERE timeid = %s;", (timeid, ))
     if (cursor.fetchone() != 0):
         cursor = run_query(connection, "UPDATE teetimes SET spots = spots - 1 WHERE timeid = %s;", (timeid, ))
         context = {'message': ''}
