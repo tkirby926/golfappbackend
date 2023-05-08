@@ -294,7 +294,7 @@ def user_helper_posts(connection, user):
         return False
     cursor = run_query(connection, "SELECT C.username, U.imageurl FROM COOKIES C, USERS U WHERE sessionid = %s AND U.username = C.username;", (user,))
     user = cursor.fetchone()
-    if user[0] is None:
+    if user is None:
         return False
     user = list(user)
     return user
@@ -730,7 +730,7 @@ def check_in_time(timeid):
     connection = create_server_connection()
     user = flask.request.cookies.get('username')
     user = user_helper(connection, user)
-    cursor = run_query(connection, "SELECT T.teetime, C.Coursename, T.Cost, T.Spots FROM BOOKEDTIMES B, COURSES C, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND C.uniqid = T.uniqid AND T.timeid = B.timeid;", (user, timeid))
+    cursor = run_query(connection, "SELECT T.teetime, C.Coursename, T.Cost, T.Spots FROM BOOKEDTIMES B, COURSES C, TEETIMES T WHERE B.username = %s AND B.timeid = %s AND C.uniqid = T.uniqid AND T.timeid = B.timeid AND T.teetime > CURRENT_TIMESTAMP;", (user, timeid))
     in_time = True
     time_info = cursor.fetchone()
     print(time_info)
