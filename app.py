@@ -734,7 +734,7 @@ def check_in_time(timeid):
     in_time = True
     time_info = cursor.fetchone()
     print(time_info)
-    if len(time_info) == 0:
+    if time_info is None:
         in_time = False
     context = {"time_info": time_info, "in_time": in_time} 
     return flask.jsonify(**context)
