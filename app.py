@@ -888,7 +888,7 @@ def get_search_location(search):
 @app.route('/api/v1/search/any_course/<string:limit>')
 def get_some_courses(limit):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT uniqid, coursename FROM COURSES LIMIT %s;", (int(limit), ))
+    cursor = run_query(connection, "SELECT uniqid, coursename, imageurl, street, town, state, zip FROM COURSES LIMIT %s;", (int(limit), ))
     results = cursor.fetchall()
     context = {"results": results, "last": True} 
     return flask.jsonify(**context)
