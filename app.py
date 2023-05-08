@@ -1213,7 +1213,7 @@ def get_courses_times(courseid, date):
     connection = create_server_connection()
     cursor = run_query(connection, "SELECT coursename, imageurl, street, town, state, zip FROM COURSES WHERE uniqid = %s;", (courseid, ))
     course_info = cursor.fetchone()
-    cursor = run_query(connection, "SELECT T.timeid, teetime, uniqid, cost, spots, cart, holes, SUM(B.numusers) FROM TEETIMES T, LEDGER B WHERE B.timeid = T.timeid AND SUM(B.numusers) < 4 AND T.uniqid = %s" + 
+    cursor = run_query(connection, "SELECT T.timeid, teetime, uniqid, cost, spots, cart, holes, SUM(B.numusers) FROM TEETIMES T, LEDGER B WHERE B.timeid = T.timeid AND AND T.uniqid = %s GROUP BY B.timeid HAVING SUM(B.numsusers) < 4" + 
     " AND CAST(T.teetime AS DATE) = %s ORDER BY T.teetime;", (courseid, date))
     course_times = cursor.fetchall()
     context = {'course_info': course_info, 'course_times': course_times}
