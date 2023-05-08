@@ -134,7 +134,7 @@ def create_tables():
         )""")
     cursor = run_query_basic(connection, """CREATE TABLE ledger (
         timeid varchar(20) DEFAULT NULL,
-        Cost varchar(20) DEFAULT NULL,
+        paymentamount varchar(20) DEFAULT NULL,
         username varchar(20) DEFAULT NULL,
         timestamp datetime DEFAULT NULL,
         numusers int DEFAULT NULL
