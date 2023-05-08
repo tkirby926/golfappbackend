@@ -43,6 +43,7 @@ def create_tables():
         PRIMARY KEY (timeid),
         KEY uniqid (uniqid)
         )""")
+    cursor = run_query_basic(connection, """DROP TABLE ledger;""")
     cursor = run_query_basic(connection, """CREATE TABLE users (
         username varchar(20) NOT NULL,
         firstname varchar(30) DEFAULT NULL,
