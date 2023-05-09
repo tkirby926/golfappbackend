@@ -991,6 +991,7 @@ def get_swipe_times(zip, date, offset):
     lat, lon = location_search_helper(zip)
     good_courses, swipe_course, good_time_users, cid_string, more = get_swipe_times_helper(lat, lon, date, offset)
     context = {'good_courses': good_courses, 'time': swipe_course, 'time_users': good_time_users, 'cids': cid_string, 'more': more}
+    print(context)
     return flask.jsonify(**context)
 
 @app.route('/api/v1/location_city/<string:lat>/<string:lon>/<string:date>')
@@ -1774,15 +1775,14 @@ def create_friend_req():
 def add_receipt():
     req = flask.request.json
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT numusers, spots FROM paymentintents, teetimes WHERE intent = %s AND timeid = %s;", (req['time'], req['clientSecret']))
+    cursor = run_query(connection, "SELECT numusers, spots FROM paymentintents, teetimes WHERE intent = %s AND timeid = %s;", (req['timeid'], req['clientSecret']))
     nums = cursor.fetchone()
     intent = stripe.PaymentIntent.retrieve(req['intent_id'])
     if (nums is None or nums[0] > nums[1]):
         intent.cancel()
         return flask.jsonify({"error": "Time is no longer available or session has expired, please refresh the page"})
-
-    cursor = run_query(connection, "UPDATE TEETIMES set spots = spots - %s WHERE timeid = %s", (nums[0], req['time']))
-    cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['time'], req['course'], req['cost']))
+    cursor = run_query(connection, "UPDATE TEETIMES set spots = spots - %s WHERE timeid = %s", (nums[0], req['timeid']))
+    cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['timeid'], req['course'], req['cost']))
     intent.confirm(client_secret=req['clientSecret'])
     return flask.jsonify({'message': 'success'})
 
