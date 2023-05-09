@@ -1774,9 +1774,17 @@ def create_friend_req():
 def add_receipt():
     req = flask.request.json
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT COUNT(*) FROM paymentintents where intent = %s AND numusers = %s;", (req['secret'], req['numusers']))
+    cursor = run_query(connection, "SELECT numusers, spots FROM paymentintents, teetimes WHERE intent = %s AND timeid = %s;", (req['time'], req['clientSecret']))
+    nums = cursor.fetchone()
+    intent = stripe.PaymentIntent.retrieve(req['intent_id'])
+    if (nums is None or nums[0] > nums[1]):
+        intent.cancel()
+        return flask.jsonify({"error": "Time is no longer available or session has expired, please refresh the page"})
+
+    cursor = run_query(connection, "UPDATE TEETIMES set spots = spots - %s WHERE timeid = %s", (nums[0], req['time']))
     cursor = run_query(connection, "INSERT INTO Ledger (user, timeid, uniqid, cost) VALUES (%s, %s, %s, %s);", (req['user'], req['time'], req['course'], req['cost']))
-    return flask.jsonify("")
+    intent.confirm(client_secret=req['clientSecret'])
+    return flask.jsonify({'message': 'success'})
 
 @app.route('/api/v1/accept_request/<string:accepted_user>', methods=["POST"])
 def accept_friend_req(accepted_user):
@@ -2046,15 +2054,17 @@ def get_time_info(timeid):
     context = {"time_info": time_info, 'in_time': in_time}
     return flask.jsonify(**context)
 
-@app.route('/api/v1/payment_confirmed/<string:timeid>', methods = ["PUT"])
+@app.route('/api/v1/payment_process/<string:timeid>', methods = ["PUT"])
 def change_spots(timeid):
     connection = create_server_connection()
-    cursor = run_query(connection, "SELECT spots FROM teetimes WHERE timeid = %s;", (timeid, ))
-    if (cursor.fetchone() != 0):
-        cursor = run_query(connection, "UPDATE teetimes SET spots = spots - 1 WHERE timeid = %s;", (timeid, ))
+    req = flask.request.json
+    cursor = run_query(connection, "SELECT numusers, spots FROM paymentintents, teetimes WHERE intent = %s AND timeid = %s;", (req['intent'], timeid))
+    nums = cursor.fetchone()
+    if nums[0] <= nums[1]:
+        cursor = run_query(connection, "UPDATE teetimes SET spots = spots - %s WHERE timeid = %s;", (nums[0], timeid))
         context = {'message': ''}
     else:
-        context = {'message': 'error'}
+        context = {'message': 'This time is no longer available'}
     return flask.jsonify(**context)
 
 
