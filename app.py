@@ -205,10 +205,6 @@ def job():
         cursor = run_query(connection, "INSERT INTO TEETIMES (uniqid, teetime, cost, spots, cart) VALUES (%s, %s, %s, 4, 0);", (str(j[0]), str(right_time), str(j[3])))
     context = {'message': 'completed nightly batch'}
 
-# refresh_token = "3Zn9qMSYVyAAAAAAAAAAAVPUsKUA33XATk-8tKujM1V8q0WcihZevxGE5x46ZZF5"
-# app_key = "oop5bqdljvyo2aa"
-# app_secret = "hsspgilce6up444"
-# dbx = dropbox.Dropbox(oauth2_refresh_token=refresh_token, app_key=app_key, app_secret=app_secret)
 imgbbkey = '5acb680159cbebee2e67690c18137e89'
 # trigger2 = CronTrigger(
 #         year="*", month="*", day="*", hour="*", minute="*", second=0
