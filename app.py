@@ -24,8 +24,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import random, string
 from flask_cors import CORS
 
-BUCKET = 'golftribephotos'
-MAIL_API_KEY = '8556fb8b6ff1ddbd28dd5b52ef62f21e-181449aa-aac0ab8b'
 
 
 
