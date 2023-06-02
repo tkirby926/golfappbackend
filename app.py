@@ -1446,7 +1446,7 @@ def create_user():
         emailcode = set_verification(username)
         print(req['email'])
         print('douche')
-        send_verif_email_helper(req['email'], 'https://www.golfsocial.com/verif_email/' + emailcode)
+#         send_verif_email_helper(req['email'], 'https://www.golfsocial.com/verif_email/' + emailcode)
     else:
         cursor = run_query(connection, """INSERT INTO COURSES (coursename, latitude, longitude, street, town, state, 
         zip, adminemail, adminpassword, adminphone, canedit, imageurl, auth) VALUES (%s, """ +
